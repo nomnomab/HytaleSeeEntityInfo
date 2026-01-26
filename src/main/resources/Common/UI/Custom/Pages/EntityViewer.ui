@@ -24,7 +24,8 @@ $C.@DecoratedContainer {
       Padding: (Horizontal: 4);
 
       $E.@InlineTextButton #BackButton {
-        Anchor: (Top: 4, Height: 24);
+        Anchor: (Height: 24);
+        Padding: (Horizontal: 12, Bottom: 5, Top: 3);
         Text: "< Back";
       }
 
@@ -33,7 +34,8 @@ $C.@DecoratedContainer {
       }
 
       $E.@InlineTextButton #ReloadButton {
-        Anchor: (Top: 4, Height: 24);
+        Anchor: (Height: 24);
+        Padding: (Horizontal: 12, Bottom: 5, Top: 3);
         Text: "Reload";
       }
     }
@@ -52,20 +54,28 @@ $C.@DecoratedContainer {
 
   #Content {
     LayoutMode: Top;
-    Padding: 10;
+    Padding: (Horizontal: 10, Top: 4, Bottom: 10);
 
     Group #WorldContent {
       FlexWeight: 0;
       LayoutMode: Left;
+      Anchor: (Bottom: 4);
 
       $E.@InlineTextButton #TpWorldButton {
         Text: "/tp world";
       }
     }
 
+    // Divider line matching container inner border
+    Group #FooterDivider {
+      Anchor: (Height: 2);
+      Background: #19252F;
+    }
+
     Group #EntityContent {
       FlexWeight: 1;
       LayoutMode: Top;
+      Padding: 4;
 
       Group #EntityList {
         LayoutMode: TopScrolling;

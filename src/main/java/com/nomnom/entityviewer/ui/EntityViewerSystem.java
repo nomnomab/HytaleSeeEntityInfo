@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.*;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 public class EntityViewerSystem extends TickingSystem<EntityStore> {
@@ -53,6 +54,14 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         worldData.Archetypes.clear();
         worldData.Entities.clear();
 
+        // no players here, so no point in getting information
+        if (worldData.World.getPlayerCount() == 0) {
+            return;
+        }
+
+        var nf = NumberFormat.getNumberInstance();
+        nf.setMaximumFractionDigits(2);
+
         // remake the database
         store.forEachChunk((chunk, cmd) -> {
             var archetype = chunk.getArchetype();
@@ -67,6 +76,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                 var entityData = new EntityData(entityId);
                 entityData.WorldName = worldData.Name;
 
+                // collect component information!
                 entityData.Components = new ArrayList<>();
                 for (int j = archetype.getMinIndex(); j < archetype.length(); j++) {
                     var compType = archetype.get(j);
@@ -103,8 +113,11 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                         } else if (componentName.equals("TransformComponent")) {
                             var transform = store.getComponent(entityRef, TransformComponent.getComponentType());
                             if (transform != null) {
-                                entityData.Properties.put("position", transform.getPosition().toString());
-                                entityData.Properties.put("rotation", transform.getRotation().toString());
+                                var pos = transform.getPosition();
+                                entityData.Properties.put("position", nf.format(pos.x) + ", " + nf.format(pos.y) + ", " + nf.format(pos.z));
+
+                                var rot = transform.getRotation();
+                                entityData.Properties.put("rotation",  nf.format(rot.x) + ", " + nf.format(rot.y) + ", " + nf.format(rot.z));
                             }
                         }
                     }
@@ -128,8 +141,6 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
     private static final List<Integer> _entitiesToRemove = new ArrayList<>();
     public static void checkForInvalidEntities(@NonNullDecl WorldData worldData, @NonNullDecl Store<EntityStore> store) {
-//        EntityViewer.log("[" + worldData.Name + "] Checking for invalid entities...");
-
         _entitiesToRemove.clear();
 
         for (var entity : worldData.Entities.values()) {
@@ -153,15 +164,12 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
         _entitiesToRemove.clear();
 
-//        EntityViewer.log("[" + worldData.Name + "] Done checking for invalid entities!");
         if (hadOne) {
             worldData.WantsPageRebuild = true;
         }
     }
 
     private static void repaintPages(WorldData worldData, @NonNullDecl Store<EntityStore> store) {
-        EntityViewer.log("[" + worldData.Name + "] Repainting pages for world: " + store.getExternalData().getWorld().getName());
-
         for (var playerData : EntityViewer.getInstance().Players.values()) {
             var world = playerData.getWorld();
             var playerRef = playerData.PlayerRef;
@@ -187,7 +195,5 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                 }
             });
         }
-
-        EntityViewer.log("[" + worldData.Name + "] Done repainting pages!");
     }
 }

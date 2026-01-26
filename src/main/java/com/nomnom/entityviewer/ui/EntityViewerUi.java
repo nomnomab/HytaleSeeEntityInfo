@@ -1,7 +1,5 @@
 package com.nomnom.entityviewer.ui;
 
-import com.hypixel.hytale.builtin.buildertools.PrototypePlayerBuilderToolSettings;
-import com.hypixel.hytale.builtin.buildertools.tooloperations.ToolOperation;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -10,7 +8,6 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
@@ -24,7 +21,6 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.nomnom.entityviewer.EntityViewer;
 import com.nomnom.entityviewer.PlayerData;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
@@ -36,6 +32,9 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
 //    private static final Value<String> TAB_STYLE_ACTIVE = Value.ref("Common.ui", "DefaultTextButtonStyle");
 //    private static final Value<String> TAB_STYLE_INACTIVE = Value.ref("Common.ui", "SecondaryTextButtonStyle");
 
+    private boolean _usingDropdown;
+    private boolean _waitingToRedraw;
+
     public EntityViewerUi(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime) {
         super(playerRef, lifetime, Data.CODEC);
 
@@ -44,13 +43,6 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
 
     private PlayerData getPlayerData() {
         return EntityViewer.getInstance().Players.get(playerRef.getUuid());
-    }
-
-    @Override
-    public void onDismiss(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl Store<EntityStore> store) {
-        super.onDismiss(ref, store);
-
-//        EntityViewer.getInstance().unregisterPlayer(playerRef);
     }
 
     @Override
@@ -73,9 +65,6 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
     }
 
     void buildWorldContent(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
-//        var worldData = playerData.getSelectedWorldData();
-        //        uiCommandBuilder.clear("#WorldContent");
-
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#WorldContent #TpWorldButton", EventData.of(Data.KEY_BUTTON, "TpToWorld"), false);
     }
 
@@ -90,6 +79,8 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
         uiCommandBuilder.set("#WorldDropdown.Value", playerData.SelectedWorldName);
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged, "#WorldDropdown", EventData.of(Data.KEY_BUTTON, "SwitchWorld")
                 .append(Data.KEY_DROPDOWN, "#WorldDropdown.Value"));
+//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#WorldDropdown", EventData.of(Data.KEY_BUTTON, "SwitchWorldGained"));
+//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.FocusLost, "#WorldDropdown", EventData.of(Data.KEY_BUTTON, "SwitchWorldLost"));
     }
 
     void buildPagination(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
@@ -119,16 +110,6 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
         this.sendUpdate(commandBuilder, eventBuilder, false);
     }
 
-//    public void buildBook() {
-//        var playerData = getPlayerData();
-//        var commandBuilder = new UICommandBuilder();
-//        var eventBuilder =  new UIEventBuilder();
-//
-//        buildBook(playerData, commandBuilder, eventBuilder);
-//
-//        this.sendUpdate(commandBuilder, eventBuilder, false);
-//    }
-
     void buildBook(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         var worldData = playerData.getSelectedWorldData();
 
@@ -141,16 +122,6 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
         buildTabs(playerData, uiCommandBuilder, uiEventBuilder);
         buildPagination(playerData, uiCommandBuilder, uiEventBuilder);
     }
-
-//    public void buildPage() {
-//        var playerData = getPlayerData();
-//        var commandBuilder = new UICommandBuilder();
-//        var eventBuilder =  new UIEventBuilder();
-//
-//        buildPage(playerData, commandBuilder, eventBuilder);
-//
-//        this.sendUpdate(commandBuilder, eventBuilder, false);
-//    }
 
     void buildPage(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         uiCommandBuilder.clear("#EntityList");
@@ -213,20 +184,15 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
                 }
             }
 
-            // dropdown options
+            // entity options
             // does it have a transform though?
             if (entityData.Components.contains("TransformComponent")) {
-                var options = new ArrayList<DropdownEntryInfo>();
-                options.add(new DropdownEntryInfo(LocalizableString.fromString("..."), ""));
-                options.add(new DropdownEntryInfo(LocalizableString.fromString("Go to"), "GoTo"));
-                options.add(new DropdownEntryInfo(LocalizableString.fromString("Bring here"), "BringHere"));
-
-                uiCommandBuilder.set("#EntityList[" + ctx.listIndex + "] #EntityOptions.Entries", options);
-                uiCommandBuilder.set("#EntityList[" + ctx.listIndex + "] #EntityOptions.Value", "...");
-                uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged, "#EntityList[" + ctx.listIndex + "] #EntityOptions", EventData.of(Data.KEY_BUTTON, "EntityOptions")
-                        .append(Data.KEY_DROPDOWN, "#EntityList[" + ctx.listIndex + "] #EntityOptions.Value")
-                        .append(Data.KEY_INDEX, String.valueOf(ctx.listIndex))
-                        .append(Data.KEY_UUID, entityData.UniqueId.toString()), false);
+                uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#EntityList[" + ctx.listIndex + "] #EntityTpTo", EventData.of(Data.KEY_BUTTON, "EntityTpTo")
+                        .append(Data.KEY_UUID, entityData.UniqueId.toString())
+                        , false);
+                uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#EntityList[" + ctx.listIndex + "] #EntityBringHere", EventData.of(Data.KEY_BUTTON, "EntityBringHere")
+                        .append(Data.KEY_UUID, entityData.UniqueId.toString())
+                        , false);
             } else {
                 uiCommandBuilder.set("#EntityList[" + ctx.listIndex + "] #EntityOptions.Visible", false);
             }
@@ -306,46 +272,57 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
                 }
             }
 
-            if (data.button.equals("EntityOptions")) {
+            if (data.button.equals("EntityTpTo")) {
                 var commandBuilder = new UICommandBuilder();
                 var eventBuilder = new UIEventBuilder();
-
-                var index = Integer.parseInt(data.index);
-                commandBuilder.set("#EntityList[" + index + "] #EntityOptions.Value", "...");
 
                 try {
                     var uuid = UUID.fromString(data.uuid);
                     var entityRef = store.getExternalData().getRefFromUUID(uuid);
                     var entityTransform = store.getComponent(entityRef, TransformComponent.getComponentType());
 
-                    if (data.dropdownValue.equals("GoTo")) {
-                        // move player to entity
-                        assert playerRef.getWorldUuid() != null;
-                        var world = Universe.get().getWorld(playerRef.getWorldUuid());
+                    // move player to entity
+                    assert playerRef.getWorldUuid() != null;
+                    var world = Universe.get().getWorld(playerRef.getWorldUuid());
 
-                        assert world != null;
-                        world.execute(() -> {
-                            var teleport = Teleport.createForPlayer(world,
-                                    entityTransform.getPosition(),
-                                    new Vector3f(0, 0, 0)
-                            );
-                            store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
-                        });
-                    } else if (data.dropdownValue.equals("BringHere")) {
-                        // move entity to player
-                        var world = entityRef.getStore().getExternalData().getWorld();
-
-                        world.execute(() -> {
-                            var playerTransform = store.getComponent(playerRef.getReference(), TransformComponent.getComponentType());
-                            var teleport = Teleport.createForPlayer(world,
-                                    playerTransform.getPosition(),
-                                    new Vector3f(0, 0, 0)
-                            );
-                            store.addComponent(entityRef, Teleport.getComponentType(), teleport);
-                        });
-                    }
+                    assert world != null;
+                    world.execute(() -> {
+                        var teleport = Teleport.createForPlayer(world,
+                                entityTransform.getPosition(),
+                                new Vector3f(0, 0, 0)
+                        );
+                        store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+                    });
                 } catch (Exception e) {
-                    EntityViewer.err("error when using dropdown value " + data.dropdownValue + ", error: " + e);
+                    EntityViewer.err("error when using EntityTpTo, error: " + e);
+                }
+
+                this.sendUpdate(commandBuilder, eventBuilder, false);
+
+                return;
+            }
+
+            if (data.button.equals("EntityBringHere")) {
+                var commandBuilder = new UICommandBuilder();
+                var eventBuilder = new UIEventBuilder();
+
+                try {
+                    var uuid = UUID.fromString(data.uuid);
+                    var entityRef = store.getExternalData().getRefFromUUID(uuid);
+
+                    // move entity to player
+                    var world = entityRef.getStore().getExternalData().getWorld();
+
+                    world.execute(() -> {
+                        var playerTransform = store.getComponent(playerRef.getReference(), TransformComponent.getComponentType());
+                        var teleport = Teleport.createForPlayer(world,
+                                playerTransform.getPosition(),
+                                new Vector3f(0, 0, 0)
+                        );
+                        store.addComponent(entityRef, Teleport.getComponentType(), teleport);
+                    });
+                } catch (Exception e) {
+                    EntityViewer.err("error when using EntityBringHere, error: " + e);
                 }
 
                 this.sendUpdate(commandBuilder, eventBuilder, false);

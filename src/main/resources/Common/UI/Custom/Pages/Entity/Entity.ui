@@ -1,9 +1,9 @@
 $C = "../../Common.ui";
+$E = "../EntityViewerCommon.ui";
 
 Group {
   LayoutMode: Top;
-  Anchor: (Left: 10, Vertical: 5);
-  Padding: (Top: 5, Bottom: 5);
+  Padding: (Vertical: 5);
 
   // info row
   Group {
@@ -48,8 +48,6 @@ Group {
         );
         Text: "-";
       }
-
-      $C.@DropdownBox #EntityOptions {}
     }
   }
 
@@ -68,20 +66,20 @@ Group {
     }
   }
 
-  // component row
-//  Label #ComponentList {
-//    Style: (
-//      FontSize: 14,
-//      TextColor: #ffffff,
-//      Wrap: true
-//    );
-//  }
-//  Group {
-//    LayoutMode: LeftCenterWrap;
-//
-//    Group #ComponentList {
-//      LayoutMode: TopScrolling;
-//      ScrollbarStyle: $C.@DefaultScrollbarStyle;
-//    }
-//  }
+  Group #EntityOptions {
+    LayoutMode: Left;
+    Padding: (Top: 2);
+
+    $E.@InlineTextButton #EntityTpTo {
+      Text: "go to";
+    }
+
+    Group {
+      Anchor: (Left: 5);
+    }
+
+    $E.@InlineTextButton #EntityBringHere {
+      Text: "bring here";
+    }
+  }
 }

@@ -5,7 +5,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerData {
@@ -42,7 +41,9 @@ public class PlayerData {
     }
 
     public World getWorld() {
-        var store = Objects.requireNonNull(PlayerRef.getReference()).getStore();
+        var ref = PlayerRef.getReference();
+        if (ref == null) return null;
+        var store = ref.getStore();
         return store.getExternalData().getWorld();
     }
 
