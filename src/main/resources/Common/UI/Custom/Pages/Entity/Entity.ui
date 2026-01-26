@@ -1,0 +1,87 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Top;
+  Anchor: (Left: 10, Vertical: 5);
+  Padding: (Top: 5, Bottom: 5);
+
+  // info row
+  Group {
+    LayoutMode: Left;
+
+    Group {
+      LayoutMode: Left;
+
+      Label #EntityId {
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff
+        );
+        Anchor: (Vertical: 0, Width: 50);
+        Text: "# ";
+      }
+
+      // display name if able
+      Label #DisplayName {
+        Style: (
+          FontSize: 14,
+          TextColor: #ffffff,
+          Wrap: true
+        );
+        Text: "-";
+      }
+    }
+
+    Label {
+      FlexWeight: 1;
+    }
+
+    Group {
+      LayoutMode: Top;
+
+      // display uuid if able
+      Label #UniqueId {
+        Style: (
+          FontSize: 14,
+          TextColor: #ffffff
+        );
+        Text: "-";
+      }
+
+      $C.@DropdownBox #EntityOptions {}
+    }
+  }
+
+  // properties
+  Group #DisplayProperties {
+    LayoutMode: Top;
+    Visible: false;
+  }
+
+  Group {
+    LayoutMode: Left;
+
+    AssetImage #EntityImage {
+      Anchor: (Width: 64, Height: 64);
+      Visible: false;
+    }
+  }
+
+  // component row
+//  Label #ComponentList {
+//    Style: (
+//      FontSize: 14,
+//      TextColor: #ffffff,
+//      Wrap: true
+//    );
+//  }
+//  Group {
+//    LayoutMode: LeftCenterWrap;
+//
+//    Group #ComponentList {
+//      LayoutMode: TopScrolling;
+//      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+//    }
+//  }
+}

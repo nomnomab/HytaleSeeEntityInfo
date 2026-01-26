@@ -1,0 +1,17 @@
+$C = "../../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Bottom: 5);
+  Background: $C.@InputBoxBackground;
+  Padding: (Top: 5, Bottom: 5);
+
+  Label #ComponentName {
+    Style: (
+      FontSize: 14,
+      TextColor: #ffffff
+    );
+    Anchor: (Left: 10);
+    Padding: (Top: 2);
+  }
+}

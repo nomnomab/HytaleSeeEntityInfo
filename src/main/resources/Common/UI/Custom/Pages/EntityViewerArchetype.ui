@@ -1,0 +1,44 @@
+$C = "../Common.ui";
+
+Group {
+  LayoutMode: Left;
+  Anchor: (Bottom: 5);
+  FlexWeight: 1;
+  Background: $C.@InputBoxBackground;
+  Padding: (Top: 5, Bottom: 3);
+
+  Label #ArchetypeId {
+    Style: (
+      FontSize: 16,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+    Anchor: (Left: 10, Vertical: 0, Width: 50);
+    Padding: (Right: 2);
+  }
+
+  Label #ArchetypeEntityCount {
+    Style: (
+      FontSize: 16,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+    Anchor: (Left: 10, Vertical: 0, Width: 50);
+    Padding: (Right: 2);
+  }
+
+  Label #ArchetypeComponents {
+    Style: (
+      FontSize: 16,
+      RenderBold: true,
+      TextColor: #ffffff,
+      Wrap: true
+    );
+    Anchor: (Left: 10, Vertical: 0);
+    Padding: (Right: 2);
+  }
+
+//  Label {
+//    FlexWeight: 1;
+//  }
+}

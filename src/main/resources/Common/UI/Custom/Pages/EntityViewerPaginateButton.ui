@@ -1,0 +1,9 @@
+$E = "EntityViewerCommon.ui";
+
+Group {
+  LayoutMode: Left;
+
+  $E.@PaginateSquareButton #PageButton {
+    Text: "1";
+  }
+}

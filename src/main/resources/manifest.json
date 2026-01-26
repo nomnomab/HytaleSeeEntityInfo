@@ -1,11 +1,11 @@
 {
-    "Group": "Example",
-    "Name": "ExamplePlugin",
+    "Group": "com.nomnom",
+    "Name": "Entity Viewer",
     "Version": "0.0.2",
     "Description": "An example plugin for HyTale!",
     "Authors": [
         {
-            "Name": "It's you!"
+            "Name": "Nomnom"
         }
     ],
     "Website": "example.org",
@@ -17,6 +17,6 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "org.example.plugin.ExamplePlugin",
+    "Main": "com.nomnom.entityviewer.EntityViewer",
     "IncludesAssetPack": true
 }

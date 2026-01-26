@@ -1,0 +1,121 @@
+$C = "../Common.ui";
+$E = "EntityViewerCommon.ui";
+
+@PaginateSquareButton = TextButton {
+  @Anchor = Anchor();
+  @Sounds = ();
+  Style: (
+    ...@SquareButtonStyle,
+  );
+  Anchor: (...@Anchor, Width: 30, Height: 30, Horizontal: 1);
+  Padding: 0;
+  Text: @Text;
+};
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1280, Height: 720);
+
+  #Title {
+    Group {
+      LayoutMode: Left;
+      Anchor: (Left: 8);
+      Padding: (Horizontal: 4);
+
+      $E.@InlineTextButton #BackButton {
+        Anchor: (Top: 4, Height: 24);
+        Text: "< Back";
+      }
+
+      Group {
+        Anchor: (Left: 4);
+      }
+
+      $E.@InlineTextButton #ReloadButton {
+        Anchor: (Top: 4, Height: 24);
+        Text: "Reload";
+      }
+    }
+
+    $C.@Title {
+      Style: (
+        ...$C.@TitleStyle,
+        HorizontalAlignment: Center,
+      );
+      Padding: (Horizontal: 19);
+      Text: "Entity Viewer";
+    }
+
+    $C.@HeaderSearch {}
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: 10;
+
+    Group #WorldContent {
+      FlexWeight: 0;
+      LayoutMode: Left;
+
+      $E.@InlineTextButton #TpWorldButton {
+        Text: "/tp world";
+      }
+    }
+
+    Group #EntityContent {
+      FlexWeight: 1;
+      LayoutMode: Top;
+
+      Group #EntityList {
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        FlexWeight: 1;
+      }
+    }
+
+    // Footer
+    Group #Footer {
+      Anchor: (Height: 40);
+      LayoutMode: Top;
+      Padding: (Horizontal: -2);
+
+      // Divider line matching container inner border
+      Group #FooterDivider {
+        Anchor: (Height: 2);
+        Background: #19252F;
+      }
+
+      // Timer text centered in remaining space
+      Group #FooterContent {
+        FlexWeight: 1;
+        LayoutMode: Left;
+        Padding: (Horizontal: 5, Bottom: 1, Top: 6);
+
+        $C.@DropdownBox #WorldDropdown {
+          Value: "default";
+        }
+
+        Group {
+          Anchor: (Right: 5);
+        }
+
+        Label #EntityCount {
+          Style: (
+            FontSize: 14,
+            TextColor: #7caacc,
+            VerticalAlignment: Center,
+          );
+          Text: "0 entities";
+        }
+
+        Group #PaginationButtons {
+          FlexWeight: 1;
+          LayoutMode: Right;
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}
