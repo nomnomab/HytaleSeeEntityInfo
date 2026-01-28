@@ -1,0 +1,610 @@
+$C = "../../Common.ui";
+
+@LeftPanelWidth = 300;
+@RightPanelWidth = 500;
+
+@LabelStyle = (
+  Hovered: (
+    Background: #000000(0.13),
+  ),
+  Pressed: (
+    Background: #FF0000(0.13),
+  ),
+  Sounds: $C.@ButtonSounds,
+);
+
+@GrayLabelColor = #96a9be;
+@GrayLabelStyle = (TextColor: @GrayLabelColor);
+@MiniGrayLabelStyle = (FontSize: 10, TextColor: @GrayLabelColor);
+@PropertyItemLabelStyle = (
+  FontSize: 10,
+  TextColor: @GrayLabelColor
+);
+
+@SelectedLabelStyle = (
+  Default: (
+    LabelStyle: (RenderBold: true)
+  ),
+  Hovered: (
+    LabelStyle: (RenderBold: true),
+    Background: #000000(0.13)
+  )
+);
+
+@EntityListItem = Group {
+  @Text = "";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  Padding: (Right: 8);
+
+  TextButton #Button {
+    Padding: (Full: 6);
+    FlexWeight: 1;
+
+    Style: @LabelStyle;
+    Text: @Text;
+  }
+
+  Group {
+    Anchor: (Width: 32);
+    Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 0);
+  }
+
+  Label {
+    Style: (
+      ...@MiniGrayLabelStyle,
+      VerticalAlignment: Center,
+    );
+    Text: "#23";
+  }
+};
+
+@EntityPropertyItem = Group {
+  @Key = "key";
+  @Val = "value";
+  @ValWidth = 480;
+
+  LayoutMode: Left;
+
+  Label {
+    Style: @PropertyItemLabelStyle;
+    Text: @Key;
+
+    Anchor: (Width: 100);
+  }
+
+  Label {
+    Style: (
+      ...@PropertyItemLabelStyle,
+      Wrap: true
+    );
+    Text: @Val;
+
+    Anchor: (Right: 0, Width: @ValWidth);
+  }
+};
+
+@EntityComponentListItem = Group {
+  @Text = "";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  FlexWeight: 1;
+
+  Label {
+    Style: (
+      FontSize: 12,
+    );
+    Padding: (Full: 6);
+    FlexWeight: 1;
+    Text: @Text;
+  }
+};
+
+@InlineTextButtonStyle = TextButtonStyle(
+  Default: (LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true)),
+  Hovered: (
+    LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true),
+    Background: #000000(0.13),
+  ),
+  Pressed: (
+    LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true),
+    Background: #FF0000(0.13),
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@InlineTextButton = TextButton {
+  @Anchor = Anchor();
+  @Sounds = ();
+  @Text = "";
+  Style: (
+    ...@InlineTextButtonStyle,
+  );
+  Background: #000000(0.13);
+  Padding: (Horizontal: 12, Vertical: 5);
+  Text: @Text;
+};
+
+@ListTitle = Group {
+  @Title = "Name";
+  @Text = "0";
+  LayoutMode: Left;
+
+  Label {
+    Style: (
+      FontSize: 14,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+    Text: @Title;
+  }
+
+  Group {
+    FlexWeight: 1;
+  }
+
+  Label {
+    Style: @MiniGrayLabelStyle;
+    Text: @Text;
+  }
+};
+
+// content
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1200, Height: 720);
+
+  #Title {
+    Group {
+      LayoutMode: Left;
+      $C.@Title {
+        @Text = "Entity Viewer";
+      }
+    }
+
+    $C.@HeaderSearch {}
+  }
+
+  #Content {
+    LayoutMode: Left;
+    Padding: 0;
+
+    Group {
+      LayoutMode: Left;
+      FlexWeight: 1;
+      Padding: (Horizontal: 10, Top: 4, Bottom: 10);
+
+      Group #LeftPanel {
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Anchor: (Width: @LeftPanelWidth);
+        Padding: (Left: 5, Right: 0, Vertical: 5);
+//        Background: #ff0000(0.2);
+
+        Label {
+          Style: (
+            FontSize: 14,
+            RenderBold: true,
+            TextColor: #ffffff
+          );
+          Text: "World";
+        }
+
+        $C.@DropdownBox #WorldDropdown {
+          Anchor: (Left: 0, Right: 0, Height: $C.@DropdownBoxHeight);
+          Value: "default";
+        }
+
+        Group {
+          Anchor: (Top: 10);
+        }
+
+        // World details
+        Group {
+          LayoutMode: Top;
+          Padding: (Horizontal: 4);
+          Anchor: (Height: 338);
+
+          Label {
+            Style: (
+              FontSize: 14,
+              RenderBold: true,
+              TextColor: #ffffff
+            );
+            Text: "Details";
+          }
+
+          @EntityPropertyItem {
+            @Key = "name";
+            @Val = "default";
+          }
+
+          @EntityPropertyItem {
+            @Key = "uuid";
+            @Val = "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
+            @ValWidth = 175;
+          }
+
+          @EntityPropertyItem {
+            @Key = "time";
+            @Val = "Day 4, 11:32";
+          }
+        }
+
+        Group {
+          Anchor: (Top: 10);
+        }
+
+        // Players
+        Group {
+          LayoutMode: Top;
+          Padding: (Horizontal: 4);
+
+          @ListTitle {
+            @Title = "Players";
+            @Text = "1";
+          }
+
+          Group {
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Anchor: (Height: 100);
+            Background: #000000(0.13);
+
+            Group {
+              LayoutMode: Left;
+
+              @EntityComponentListItem {
+                @Text = "nomnom";
+              }
+
+              @InlineTextButton {
+                @Text = "tp";
+              }
+            }
+          }
+        }
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Top: 10);
+          FlexWeight: 1;
+        }
+
+        // Teleporters
+        Group {
+          LayoutMode: Top;
+          Padding: (Horizontal: 4);
+
+          @ListTitle {
+            @Title = "Teleporters";
+            @Text = "2";
+          }
+
+          Group {
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Anchor: (Height: 100);
+            Background: #000000(0.13);
+
+            Group {
+              LayoutMode: Left;
+
+              @EntityComponentListItem {
+                @Text = "Cool House";
+              }
+
+              @InlineTextButton {
+                @Text = "tp";
+              }
+            }
+
+            Group {
+              LayoutMode: Left;
+
+              @EntityComponentListItem {
+                @Text = "Toaster Land";
+              }
+
+              @InlineTextButton {
+                @Text = "tp";
+              }
+            }
+          }
+        }
+      }
+
+      Group {
+        Anchor: (Right: 15);
+      }
+
+      Group #MiddlePanel {
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        FlexWeight: 1;
+        Padding: (Horizontal: 0, Vertical: 5);
+//        Background: #00ff00(0.2);
+
+        @ListTitle {
+          @Title = "Entities";
+          @Text = "4";
+        }
+
+        @EntityListItem {
+          @Text = "Duck";
+        }
+
+        @EntityListItem {
+          @Text = "Duck";
+        }
+
+        @EntityListItem {
+          @Text = "Duck";
+        }
+
+        @EntityListItem {
+          @Text = "Duck";
+        }
+
+        Group {
+          Anchor: (Top: 5);
+        }
+      }
+
+      Group {
+        Anchor: (Right: 10);
+      }
+
+      Group #RightPanel {
+        LayoutMode: Top;
+//        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Anchor: (Width: @RightPanelWidth);
+        Background: #000000(0.13);
+//        Background: #0000ff(0.2);
+        Padding: (Right: 5, Vertical: 5);
+
+        // Title details
+        Group {
+          LayoutMode: Left;
+
+          Group {
+            Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 4);
+            Anchor: (Width: 64, Height: 64);
+          }
+
+          Group {
+            Anchor: (Right: 4);
+          }
+
+          Group {
+            LayoutMode: Top;
+
+            Label {
+              Style: (
+                FontSize: 16,
+                RenderBold: true,
+                TextColor: #ffffff
+              );
+              Text: "Duck";
+            }
+
+            Label {
+              Style: @MiniGrayLabelStyle;
+              Text: "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
+            }
+
+            Label {
+              Style: @MiniGrayLabelStyle;
+              Text: "entity #23";
+            }
+          }
+        }
+
+        Group {
+          Anchor: (Top: 10);
+        }
+
+        // options
+        Group {
+          LayoutMode: Left;
+          Padding: (Horizontal: 8);
+
+          @InlineTextButton {
+            @Text = "tp";
+          }
+
+          Group {
+            Anchor: (Right: 5);
+          }
+
+          @InlineTextButton {
+            @Text = "bring here";
+          }
+
+          Group {
+            Anchor: (Right: 5);
+          }
+
+          @InlineTextButton {
+            @Text = "kill";
+          }
+        }
+
+        Group {
+          Anchor: (Top: 10);
+        }
+
+        // Entity details
+        Group {
+          LayoutMode: Top;
+          Padding: (Horizontal: 8);
+//          Anchor: (Height: 215);
+
+          @ListTitle {
+            @Title = "Properties";
+            @Text = "3";
+          }
+
+          @EntityPropertyItem {
+            @Key = "position";
+            @Val = "-1026, 148.97, -73.03";
+          }
+
+          @EntityPropertyItem {
+            @Key = "rotation";
+            @Val = "0.46, 0.47, 0";
+          }
+
+          @EntityPropertyItem {
+            @Key = "model";
+            @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
+          }
+        }
+
+        Group {
+          Anchor: (Top: 10);
+        }
+
+        // Components
+        Group {
+          LayoutMode: Top;
+          Padding: (Horizontal: 8);
+
+          @ListTitle {
+            @Title = "Components";
+            @Text = "14";
+          }
+
+          Group {
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Anchor: (Height: 450);
+
+            @EntityComponentListItem {
+              @Text = "PhysicsValues";
+            }
+
+            @EntityComponentListItem {
+              @Text = "Velocity";
+            }
+
+            @EntityComponentListItem {
+              @Text = "BoundingBox";
+            }
+
+            @EntityComponentListItem {
+              @Text = "TransformComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "HeadRotation";
+            }
+
+            @EntityComponentListItem {
+              @Text = "UUIDComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "NetworkId";
+            }
+
+            @EntityComponentListItem {
+              @Text = "EffectControllerComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "MovementAudioComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "PositionDataComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "ActiveAnimationComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "EntityTrackerSystems$Visible";
+            }
+
+            @EntityComponentListItem {
+              @Text = "SnapshotBuffer";
+            }
+
+            @EntityComponentListItem {
+              @Text = "MovementStatesComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "ModelComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "PersistentModel";
+            }
+
+            @EntityComponentListItem {
+              @Text = "DisplayNameComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "PrefabCopyableComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "DamageDataComponent";
+            }
+
+            @EntityComponentListItem {
+              @Text = "InteractionManager";
+            }
+
+            @EntityComponentListItem {
+              @Text = "Interactions";
+            }
+
+            @EntityComponentListItem {
+              @Text = "ChainingInteraction$Data";
+            }
+
+            @EntityComponentListItem {
+              @Text = "EntityStatMap";
+            }
+
+            @EntityComponentListItem {
+              @Text = "UIComponentList";
+            }
+
+            @EntityComponentListItem {
+              @Text = "NPCEntity";
+            }
+
+            @EntityComponentListItem {
+              @Text = "CombatViewSystems$CombatData";
+            }
+
+            @EntityComponentListItem {
+              @Text = "BeaconSupport";
+            }
+          }
+        }
+
+//        Group {
+//          Anchor: (Top: 10);
+//        }
+      }
+    }
+
+    // Footer
+    Group #Footer {
+      Anchor: (Height: 40);
+      LayoutMode: Top;
+      Padding: (Horizontal: -2);
+    }
+  }
+}
+
+$C.@BackButton {}

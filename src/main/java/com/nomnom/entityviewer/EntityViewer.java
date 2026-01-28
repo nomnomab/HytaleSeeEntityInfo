@@ -2,9 +2,13 @@ package com.nomnom.entityviewer;
 
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
+import com.hypixel.hytale.protocol.Packet;
+import com.hypixel.hytale.protocol.packets.interface_.Notification;
 import com.hypixel.hytale.registry.Registration;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
+import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
+import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -14,7 +18,9 @@ import com.hypixel.hytale.server.core.universe.world.events.AddWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.events.AllWorldsLoadedEvent;
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
+import com.nomnom.entityviewer.commands.ShowTestUiCommand;
 import com.nomnom.entityviewer.ui.EntityViewerSystem;
 
 import javax.annotation.Nonnull;
@@ -67,6 +73,7 @@ public class EntityViewer extends JavaPlugin {
         registerCommands();
 
         _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityviewer", "Shows the Entity Viewer")));
+        _commands.add(this.getCommandRegistry().registerCommand(new ShowTestUiCommand("testui", "Shows the Entity Viewer")));
         this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
     }
 
@@ -97,6 +104,8 @@ public class EntityViewer extends JavaPlugin {
         _events.add(this.getEventRegistry().registerGlobal(AllWorldsLoadedEvent.class, EntityViewer::onWorldsLoaded));
         _events.add(this.getEventRegistry().registerGlobal(AddWorldEvent.class, EntityViewer::onWorldAdded));
         _events.add(this.getEventRegistry().registerGlobal(RemoveWorldEvent.class, EntityViewer::onWorldRemoved));
+
+        PacketAdapters.registerOutbound(ShowTestUiCommand::reopenWindow);
     }
 
     private void registerCommands() {}
@@ -136,9 +145,6 @@ public class EntityViewer extends JavaPlugin {
             Players.put(uuid, new PlayerData(uuid, playerRef));
             log("Player " + playerRef + " has been registered");
         }
-
-//        var data = Players.get(uuid);
-//        data.reset();
     }
 
     public void unregisterPlayer(PlayerRef playerRef) {

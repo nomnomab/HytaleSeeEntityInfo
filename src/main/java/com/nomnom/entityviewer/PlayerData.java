@@ -43,6 +43,7 @@ public class PlayerData {
     public World getWorld() {
         var ref = PlayerRef.getReference();
         if (ref == null) return null;
+
         var store = ref.getStore();
         return store.getExternalData().getWorld();
     }

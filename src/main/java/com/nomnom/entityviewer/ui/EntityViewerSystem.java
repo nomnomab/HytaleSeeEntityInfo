@@ -84,6 +84,8 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                         var componentName = TypeNameUtil.getSimpleName(compType.getTypeClass().getName());
                         entityData.Components.add(componentName);
 
+                        // can check componentName.equals then store.getComponent
+
                         // if this is a DisplayNameComponent, push into the field
                         if (componentName.equals("DisplayNameComponent")) {
                             var displayName = store.getComponent(entityRef, DisplayNameComponent.getComponentType());
@@ -172,6 +174,11 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
     private static void repaintPages(WorldData worldData, @NonNullDecl Store<EntityStore> store) {
         for (var playerData : EntityViewer.getInstance().Players.values()) {
             var world = playerData.getWorld();
+            if (world == null) {
+                EntityViewer.warn("Player has a null world?");
+                continue;
+            }
+
             var playerRef = playerData.PlayerRef;
             if (playerRef == null || !playerRef.isValid()) {
                 EntityViewer.warn("[" + world.getName() + "] PlayerRef " + playerRef + " is invalid");
