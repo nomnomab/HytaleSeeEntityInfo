@@ -21,7 +21,7 @@ public class TestPage extends InteractiveCustomUIPage<TestPage.Data> {
 
     @Override
     public void build(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder, @NonNullDecl Store<EntityStore> store) {
-        uiCommandBuilder.append("Pages/Tests/TestPage.ui");
+        uiCommandBuilder.append("Pages/EntityViewer/MainPanel.ui");
     }
 
     public static class Data {

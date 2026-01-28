@@ -1,0 +1,143 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+@RightPanel = Group {
+  LayoutMode: Top;
+  Anchor: (Width: $E.@RightPanelWidth);
+  Background: #000000(0.13);
+  //        Background: #0000ff(0.2);
+  Padding: 0;
+
+  // Title details
+  Group {
+    LayoutMode: Left;
+
+    AssetImage #EntityIcon {
+      Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 4);
+      Anchor: (Width: 64, Height: 64);
+    }
+
+    Group {
+      Anchor: (Right: 4);
+    }
+
+    Group {
+      LayoutMode: Top;
+
+      Label #EntityName {
+        Style: (
+          FontSize: 16,
+          RenderBold: true,
+          TextColor: #ffffff
+//          TextColor: #ffffff(0.2),
+        );
+        Text: "Duck";
+      }
+
+      Label #EntityUUID {
+        Style: $E.@MiniGrayLabelStyle;
+        Text: "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
+      }
+
+      Label #EntityId {
+        Style: $E.@MiniGrayLabelStyle;
+        Text: "entity #23";
+      }
+
+      Label #EntityInvalid {
+        Style: (
+          ...$E.@MiniGrayLabelStyle,
+          TextColor: #ff0000,
+        );
+        Text: "ENTITY REF INVALID";
+        Visible: false;
+      }
+    }
+  }
+
+  Group {
+    Anchor: (Top: 10);
+  }
+
+  // options
+  Group #EntityOptions {
+    LayoutMode: Left;
+    Padding: (Horizontal: 8);
+
+    $E.@InlineTextButton {
+      @Text = "tp";
+    }
+
+    Group {
+      Anchor: (Right: 5);
+    }
+
+    $E.@InlineTextButton {
+      @Text = "bring here";
+    }
+
+    Group {
+      Anchor: (Right: 5);
+    }
+
+    $E.@InlineTextButton {
+      @Text = "kill";
+    }
+  }
+
+  Group {
+    Anchor: (Top: 10);
+  }
+
+  // Entity details
+  Group #EntityDetails {
+    LayoutMode: Top;
+    Padding: (Horizontal: 8);
+    //          Anchor: (Height: 215);
+
+    $E.@ListTitle {
+      @Title = "Properties";
+      @Text = "3";
+    }
+
+    $E.@EntityPropertyItem {
+      @Key = "position";
+      @Val = "-1026, 148.97, -73.03";
+    }
+
+    $E.@EntityPropertyItem {
+      @Key = "rotation";
+      @Val = "0.46, 0.47, 0";
+    }
+
+    $E.@EntityPropertyItem {
+      @Key = "model";
+      @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
+    }
+  }
+
+  Group {
+    Anchor: (Top: 10);
+  }
+
+  // Components
+  Group {
+    LayoutMode: Top;
+    Padding: (Horizontal: 8);
+
+    $E.@ListTitle #EntityComponentsCount {
+      @Title = "Components";
+      @Text = "14";
+    }
+
+    Group #EntityComponentsList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Height: 450);
+
+      $E.@EntityComponentListItem {
+        @Text = "PhysicsValues";
+      }
+    }
+  }
+};

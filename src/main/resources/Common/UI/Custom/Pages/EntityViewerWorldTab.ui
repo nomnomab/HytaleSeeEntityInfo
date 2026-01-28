@@ -1,6 +1,0 @@
-$C = "../Common.ui";
-
-$C.@SecondaryTextButton #WorldTab {
-  FlexWeight: 1;
-  Text: "uhh";
-}

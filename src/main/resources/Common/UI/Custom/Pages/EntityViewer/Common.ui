@@ -1,0 +1,154 @@
+$C = "../../Common.ui";
+
+@LeftPanelWidth = 300;
+@RightPanelWidth = 500;
+
+// elements
+
+@LabelStyle = (
+  Hovered: (
+    Background: #000000(0.13),
+  ),
+  Pressed: (
+    Background: #FF0000(0.13),
+  ),
+  Sounds: $C.@ButtonSounds,
+);
+
+@GrayLabelColor = #96a9be;
+@GrayLabelStyle = (TextColor: @GrayLabelColor);
+@MiniGrayLabelStyle = (FontSize: 10, TextColor: @GrayLabelColor);
+@PropertyItemLabelStyle = (
+  FontSize: 10,
+  TextColor: @GrayLabelColor
+);
+
+@SelectedLabelStyle = (
+  Default: (
+    LabelStyle: (RenderBold: true)
+  ),
+  Hovered: (
+    LabelStyle: (RenderBold: true),
+    Background: #000000(0.13)
+  )
+);
+
+@EntityListItem = Group {
+  @Text = "";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  Padding: (Right: 8);
+
+  TextButton #Button {
+    Padding: (Full: 6);
+    FlexWeight: 1;
+
+    Style: @LabelStyle;
+    Text: @Text;
+  }
+
+  Group {
+    Anchor: (Width: 32);
+    Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 0);
+  }
+
+  Label {
+    Style: (
+      ...@MiniGrayLabelStyle,
+      VerticalAlignment: Center,
+    );
+    Text: "#23";
+  }
+};
+
+@EntityPropertyItem = Group {
+  @Key = "key";
+  @Val = "value";
+  @ValWidth = 480;
+
+  LayoutMode: Left;
+
+  Label {
+    Style: @PropertyItemLabelStyle;
+    Text: @Key;
+
+    Anchor: (Width: 100);
+  }
+
+  Label {
+    Style: (
+      ...@PropertyItemLabelStyle,
+      Wrap: true
+    );
+    Text: @Val;
+
+    Anchor: (Right: 0, Width: @ValWidth);
+  }
+};
+
+@EntityComponentListItem = Group {
+  @Text = "";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  FlexWeight: 1;
+
+  Label {
+    Style: (
+      FontSize: 12,
+    );
+    Padding: (Full: 6);
+    FlexWeight: 1;
+    Text: @Text;
+  }
+};
+
+@InlineTextButtonStyle = TextButtonStyle(
+  Default: (LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true)),
+  Hovered: (
+    LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true),
+    Background: #000000(0.13),
+  ),
+  Pressed: (
+    LabelStyle: (FontSize: 14, TextColor: #93844c, RenderBold: true),
+    Background: #FF0000(0.13),
+  ),
+  Sounds: $C.@ButtonSounds
+);
+
+@InlineTextButton = TextButton {
+  @Anchor = Anchor();
+  @Sounds = ();
+  @Text = "";
+  Style: (
+    ...@InlineTextButtonStyle,
+  );
+  Background: #000000(0.13);
+  Padding: (Horizontal: 12, Vertical: 5);
+  Text: @Text;
+};
+
+@ListTitle = Group {
+  @Title = "Name";
+  @Text = "0";
+  LayoutMode: Left;
+
+  Label {
+    Style: (
+      FontSize: 14,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+    Text: @Title;
+  }
+
+  Group {
+    FlexWeight: 1;
+  }
+
+  Label {
+    Style: @MiniGrayLabelStyle;
+    Text: @Text;
+  }
+};

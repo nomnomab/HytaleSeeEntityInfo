@@ -1,0 +1,59 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+$LeftPanel = "LeftPanel.ui";
+$MiddlePanel = "MiddlePanel.ui";
+$RightPanel = "RightPanel.ui";
+
+// content
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1200, Height: 720);
+
+  #Title {
+    Group {
+      LayoutMode: Left;
+      $C.@Title {
+        @Text = "Entity Viewer";
+      }
+    }
+
+    $C.@HeaderSearch {}
+  }
+
+  #Content {
+    LayoutMode: Left;
+    Padding: 0;
+
+    // panels
+
+    Group {
+      LayoutMode: Left;
+      FlexWeight: 1;
+      Padding: (Horizontal: 15, Top: 10, Bottom: 10);
+
+      $LeftPanel.@LeftPanel #LeftPanel {}
+
+      Group {
+        Anchor: (Right: 15);
+      }
+
+      $MiddlePanel.@MiddlePanel #MiddlePanel {}
+
+      Group {
+        Anchor: (Right: 10);
+      }
+
+      $RightPanel.@RightPanel #RightPanel {}
+    }
+  }
+
+  // Footer
+  Group #Footer {
+    Anchor: (Height: 40);
+    LayoutMode: Top;
+    Padding: (Horizontal: -2);
+  }
+}
+
+$C.@BackButton {}

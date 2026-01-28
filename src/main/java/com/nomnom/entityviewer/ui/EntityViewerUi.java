@@ -55,7 +55,7 @@ public class EntityViewerUi extends InteractiveCustomUIPage<EntityViewerUi.Data>
     }
 
     void buildWindow(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
-        uiCommandBuilder.append("Pages/EntityViewer.ui");
+        uiCommandBuilder.append("Pages/MainPanel.ui");
 
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#BackButton", EventData.of(Data.KEY_BUTTON, "BackButton"), false);
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReloadButton", EventData.of(Data.KEY_BUTTON, "ReloadButton"), false);

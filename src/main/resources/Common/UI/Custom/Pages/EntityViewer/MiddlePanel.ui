@@ -1,0 +1,31 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+@MiddlePanel = Group {
+  LayoutMode: Top;
+  FlexWeight: 1;
+  Padding: 0;
+  //        Background: #00ff00(0.2);
+
+  $E.@ListTitle #EntitiesCount {
+    @Title = "Entities";
+    @Text = "4";
+  }
+
+  Group #EntitiesList {
+    LayoutMode: TopScrolling;
+    ScrollbarStyle: $C.@DefaultScrollbarStyle;
+
+    $E.@EntityListItem {
+      @Text = "Duck";
+    }
+
+    $E.@EntityListItem {
+      @Text = "Duck";
+    }
+
+    $E.@EntityListItem {
+      @Text = "Duck";
+    }
+  }
+};

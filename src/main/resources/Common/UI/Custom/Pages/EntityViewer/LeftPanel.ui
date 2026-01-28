@@ -1,0 +1,146 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+@LeftPanel = Group {
+  LayoutMode: TopScrolling;
+  ScrollbarStyle: $C.@DefaultScrollbarStyle;
+  Anchor: (Width: $E.@LeftPanelWidth);
+  Padding: 0;
+  //        Background: #ff0000(0.2);
+
+  Label {
+    Style: (
+      FontSize: 14,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+    Text: "World";
+  }
+
+  $C.@DropdownBox #WorldDropdown {
+    Anchor: (Left: 0, Right: 0, Height: $C.@DropdownBoxHeight);
+    Value: "default";
+  }
+
+  Group {
+    Anchor: (Top: 10);
+  }
+
+  // World details
+  Group {
+    LayoutMode: Top;
+    Padding: (Horizontal: 4);
+    Anchor: (Height: 330);
+
+    Label {
+      Style: (
+        FontSize: 14,
+        RenderBold: true,
+        TextColor: #ffffff
+      );
+      Text: "Details";
+    }
+
+    Group #WorldProperties {
+      LayoutMode: Top;
+
+      $E.@EntityPropertyItem {
+        @Key = "name";
+        @Val = "default";
+      }
+
+      $E.@EntityPropertyItem {
+        @Key = "uuid";
+        @Val = "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
+        @ValWidth = 175;
+      }
+
+      $E.@EntityPropertyItem {
+        @Key = "time";
+        @Val = "Day 4, 11:32";
+      }
+    }
+  }
+
+  Group {
+    Anchor: (Top: 10);
+  }
+
+  // Players
+  Group {
+    LayoutMode: Top;
+    Padding: (Horizontal: 4);
+
+    $E.@ListTitle #WorldPlayersCount {
+      @Title = "Players";
+      @Text = "1";
+    }
+
+    Group #WorldPlayersList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Height: 100);
+      Background: #000000(0.13);
+
+      Group {
+        LayoutMode: Left;
+
+        $E.@EntityComponentListItem {
+          @Text = "nomnom";
+        }
+
+        $E.@InlineTextButton {
+          @Text = "tp";
+        }
+      }
+    }
+  }
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Top: 10);
+    FlexWeight: 1;
+  }
+
+  // Teleporters
+  Group {
+    LayoutMode: Top;
+    Padding: (Horizontal: 4);
+
+    $E.@ListTitle #WorldTeleportersCount {
+      @Title = "Teleporters";
+      @Text = "2";
+    }
+
+    Group #WorldTeleportersList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Height: 100);
+      Background: #000000(0.13);
+
+      Group {
+        LayoutMode: Left;
+
+        $E.@EntityComponentListItem {
+          @Text = "Cool House";
+        }
+
+        $E.@InlineTextButton {
+          @Text = "tp";
+        }
+      }
+
+      Group {
+        LayoutMode: Left;
+
+        $E.@EntityComponentListItem {
+          @Text = "Toaster Land";
+        }
+
+        $E.@InlineTextButton {
+          @Text = "tp";
+        }
+      }
+    }
+  }
+};
