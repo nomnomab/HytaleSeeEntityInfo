@@ -13,15 +13,11 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 public class ListenSystem extends RefSystem<EntityStore> {
     @Override
     public void onEntityAdded(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl AddReason addReason, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer) {
-        EntityViewer.log("entity added");
-//        PageSignals.rebuildAllEntityLookups();
-
         var index = ref.getIndex();
         var world = store.getExternalData().getWorld();
         var worldData = EntityViewer.getWorldData(world);
         var entity = worldData.Entities.get(index);
         if (entity == null) {
-//            EntityViewer.warn("Failed to get entity at index " + index);
             return;
         }
 

@@ -41,14 +41,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         var worldData = EntityViewer.getWorldData(world);
         if (worldData == null) return;
 
-        updateDraw(worldData, store);
         worldData.ValidateTimer += dt;
-
-        // not alive or running, so not point in updating it
-        if (!world.isAlive() || world.isPaused()) {
-            worldData.clear();
-            return;
-        }
 
         // clear the world database and remake it from scratch
         if (worldData.RebuildEntityLookup) {
@@ -57,6 +50,14 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
             fullRebuild(worldData, store);
             return;
         }
+
+        updateDraw(worldData, store);
+
+        // not alive or running, so not point in updating it
+//        if (!world.isAlive() || world.isPaused()) {
+//            worldData.clear();
+//            return;
+//        }
 
         // check for invalid entities, such as non-valid or missing
         if (worldData.ValidateTimer >= 5.0) {

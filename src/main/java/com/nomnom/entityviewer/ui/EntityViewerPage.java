@@ -6,10 +6,14 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.vector.Transform;
+import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
 import com.hypixel.hytale.server.core.ui.LocalizableString;
@@ -17,6 +21,7 @@ import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.EntityData;
 import com.nomnom.entityviewer.EntityViewer;
@@ -63,6 +68,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     public void fullRebuild() {
+        EntityViewer.log("Full Rebuild");
         this.rebuild();
     }
 
@@ -95,6 +101,13 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         uiCommandBuilder.append("Pages/EntityViewer/MainPanel.ui");
 
+        uiCommandBuilder.set("#SearchInput.Value", playerData.Filter);
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged,
+                "#SearchInput",
+                EventData.of("@SearchInput", "#SearchInput.Value"),
+                false
+        );
+
         // build panels
         try {
             buildLeftPanel(playerData, worldData, ref, uiCommandBuilder, uiEventBuilder, store);
@@ -117,6 +130,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 "#ReloadButton",
                 EventData.of("Button", "Reload")
         );
+
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#WorldTpButton",
+                EventData.of("Button", "World_GoTo")
+        );
     }
 
     void buildWorldDetails(@NonNullDecl PlayerData playerData, @NonNullDecl WorldData worldData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder, @NonNullDecl Store<EntityStore> store) {
@@ -127,8 +145,10 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         }
         uiCommandBuilder.set("#WorldDropdown.Entries", worldDropdownOptions);
         uiCommandBuilder.set("#WorldDropdown.Value", playerData.SelectedWorldName);
-//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged, "#WorldDropdown", EventData.of(EntityViewerUi.Data.KEY_BUTTON, "SwitchWorld")
-//                .append(EntityViewerUi.Data.KEY_DROPDOWN, "#WorldDropdown.Value"));
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged,
+                "#WorldDropdown",
+                EventData.of("Button", "World_Switch")
+                        .append("@DropdownValue", "#WorldDropdown.Value"));
 
         // world details
         var worldConfig = worldData.getWorld().getWorldConfig();
@@ -166,8 +186,17 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
             uiCommandBuilder.append("#WorldPlayersList", "Pages/EntityViewer/ListItem.ui");
             uiCommandBuilder.set("#WorldPlayersList[" + index + "] #Name.Text", playerName);
-            uiCommandBuilder.append("#WorldPlayersList[" + index + "]", "Pages/EntityViewer/InlineTextButton.ui");
-            uiCommandBuilder.set("#WorldPlayersList[" + index + "] #InlineTextButton.Text", "tp");
+
+//            if (playerRef != this.playerRef) {
+                uiCommandBuilder.append("#WorldPlayersList[" + index + "]", "Pages/EntityViewer/InlineTextButton.ui");
+                uiCommandBuilder.set("#WorldPlayersList[" + index + "] #InlineTextButton.Text", "tp");
+
+                uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                        "#WorldPlayersList[" + index + "] #InlineTextButton",
+                        EventData.of("Button", "Player_GoTo")
+                                .append("EntityId", playerRef.getUuid().toString())
+                );
+//            }
 
             index++;
         }
@@ -186,8 +215,15 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         for (var warp : warps) {
             uiCommandBuilder.append("#WorldTeleportersList", "Pages/EntityViewer/ListItem.ui");
             uiCommandBuilder.set("#WorldTeleportersList[" + index + "] #Name.Text", warp.getId());
+
             uiCommandBuilder.append("#WorldTeleportersList[" + index + "]", "Pages/EntityViewer/InlineTextButton.ui");
             uiCommandBuilder.set("#WorldTeleportersList[" + index + "] #InlineTextButton.Text", "tp");
+
+            uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                    "#WorldTeleportersList[" + index + "] #InlineTextButton",
+                    EventData.of("Button", "Teleporter_Warp")
+                            .append("Warp", warp.getId())
+            );
 
             index++;
         }
@@ -204,7 +240,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         uiCommandBuilder.clear("#EntitiesList");
 
-        for (var entity : playerData.Book.Entities) {
+        for (var entity : entities) {
             createEntityListItem(entity, worldData, false, uiCommandBuilder, uiEventBuilder);
         }
     }
@@ -337,6 +373,20 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         uiCommandBuilder.set("#EntityId.Text", "entity #" + selectedEntity.Id);
 
         buildSelectedEntityComponentList(selectedEntity, uiCommandBuilder, uiEventBuilder);
+
+        // tp button
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#EntityOptions #TpButton",
+                EventData.of("Button", "Entity_GoTo")
+                        .append("EntityId", String.valueOf(selectedEntity.Id))
+        );
+
+        // bring here button
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#EntityOptions #BringHereButton",
+                EventData.of("Button", "Entity_BringHere")
+                        .append("EntityId", String.valueOf(selectedEntity.Id))
+        );
     }
 
     void buildSelectedEntityComponentList(EntityData selectedEntity, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
@@ -446,7 +496,6 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         uiCommandBuilder.append(elementId, "Pages/EntityViewer/EntityListItem.ui");
 
-//        uiCommandBuilder.set(elementId + " #Button.Text", entityData.DisplayName + "(" + entityData.ElementId + ")");
         uiCommandBuilder.set(elementId + " #Button.Text", entityData.DisplayName);
         uiCommandBuilder.set(elementId + " #Id.Text", "#" + entityData.Id);
 
@@ -460,7 +509,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         // click event
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 entityData.ElementId + " #Button",
-                EventData.of("Button", "SelectEntity")
+                EventData.of("Button", "Entity_Select")
                         .append("EntityId", String.valueOf(entityData.Id))
         );
     }
@@ -473,41 +522,190 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         var commandBuilder = new UICommandBuilder();
         var eventBuilder = new UIEventBuilder();
 
+        // filter
+        if (data.filter != null) {
+            EntityViewer.log("Filtering " + data.filter);
+
+            var playerData = getPlayerData();
+            playerData.Filter = data.filter;
+            playerData.Book.filter(playerData.Filter, playerData.getSelectedWorldData());
+
+            var worldData = playerData.getSelectedWorldData();
+            buildEntitiesList(playerData, worldData, commandBuilder, eventBuilder, store);
+        }
+
         // button
         if (data.button != null) {
             EntityViewer.log("data.button: " + data.button);
             EntityViewer.log("data.entityId: " + data.entityId);
 
             switch (data.button) {
+                // reload the whole lookup for the world
                 case "Reload": {
                     var playerData = getPlayerData();
                     PageSignals.rebuildEntityLookup(playerData.getSelectedWorld());
                     break;
                 }
-                case "SelectEntity": {
+
+                // selects an entity to display in the side panel
+                case "Entity_Select": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
                     var entityId = Integer.parseInt(data.entityId);
                     var selectedEntity = worldData.Entities.get(entityId);
-                    if (selectedEntity != null) {
+
+                    if (selectedEntity != null && playerData.SelectedEntityId != selectedEntity.Id) {
                         playerData.SelectedEntityId = selectedEntity.Id;
                         buildSelectedEntity(selectedEntity, commandBuilder, eventBuilder);
                     }
+
+                    break;
+                }
+
+                // tp to the entity
+                case "Player_GoTo":
+                case "Entity_GoTo": {
+                    var playerData = getPlayerData();
+                    var worldData = playerData.getSelectedWorldData();
+                    var entityId = Integer.parseInt(data.entityId);
+                    var selectedEntity = worldData.Entities.get(entityId);
+
+                    try {
+                        var entityRef = selectedEntity.getRef(worldData.getWorld());
+                        var entityTransform = store.getComponent(entityRef, TransformComponent.getComponentType());
+
+                        // move player to entity
+                        assert playerRef.getWorldUuid() != null;
+                        var world = Universe.get().getWorld(playerRef.getWorldUuid());
+
+                        assert world != null;
+
+                        var playerRef = this.playerRef;
+                        world.execute(() -> {
+                            var teleport = Teleport.createForPlayer(world,
+                                    entityTransform.getPosition(),
+                                    new Vector3f(0, 0, 0)
+                            );
+                            store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+
+                            close();
+                        });
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                    }
+
+                    break;
+                }
+
+                // tp the entity to me
+                case "Entity_BringHere": {
+                    var playerData = getPlayerData();
+                    var worldData = playerData.getSelectedWorldData();
+                    var entityId = Integer.parseInt(data.entityId);
+                    var selectedEntity = worldData.Entities.get(entityId);
+
+                    try {
+                        var world = worldData.getWorld();
+                        var entityRef = selectedEntity.getRef(world);
+                        var playerTransform = store.getComponent(ref, TransformComponent.getComponentType());
+
+                        // move entity to player
+                        assert world != null;
+
+                        var entityStore = world.getEntityStore().getStore();
+                        world.execute(() -> {
+                            var teleport = Teleport.createForPlayer(world,
+                                    playerTransform.getPosition(),
+                                    new Vector3f(0, 0, 0)
+                            );
+                            entityStore.addComponent(entityRef, Teleport.getComponentType(), teleport);
+
+                            close();
+                        });
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                    }
+
+                    break;
+                }
+
+                case "World_Switch": {
+                    var worldName = data.dropdown;
+                    try {
+                        EntityViewer.log("Switching world " + worldName);
+
+                        var playerData = getPlayerData();
+                        playerData.SelectedWorldName = worldName;
+
+                        commandBuilder.set("#SearchInput.Value", "");
+
+                        playerData.rebuildPage();
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using dropdown value, error: " + e);
+                    }
+                    break;
+                }
+
+                case "World_GoTo": {
+                    try {
+                        var playerData = getPlayerData();
+                        var world = playerData.getSelectedWorld();
+
+                        var player = playerData.getPlayer();
+                        assert player.getWorld() != null;
+
+                        EntityViewer.log("Requesting world tp from " + player.getWorld().getName() + " to " + world.getName());
+                        if (player.getWorld() != world) {
+                            // teleport to world
+                            player.getWorld().execute(() -> {
+                                CommandManager.get().handleCommand(player, "tp world " + world.getName());
+                            });
+
+                            close();
+                        }
+                    } catch (Exception e) {
+                        EntityViewer.err("Error while executing TpToWorld");
+                    }
+                    break;
+                }
+
+                case "Teleporter_Warp": {
+                    var warps = TeleportPlugin.get().getWarps().values();
+                    var wantedWarp = data.warp;
+
+                    try {
+                        for (var warp : warps) {
+                            if (warp.getId().equals(wantedWarp)) {
+                                var teleport = warp.toTeleport();
+
+                                // move player to warp
+                                assert playerRef.getWorldUuid() != null;
+                                var world = Universe.get().getWorld(playerRef.getWorldUuid());
+
+                                assert world != null;
+
+                                var playerRef = this.playerRef;
+                                world.execute(() -> {
+                                    var forward = Transform.getDirection(
+                                            teleport.getRotation().getPitch(),
+                                            teleport.getRotation().getYaw()
+                                    );
+                                    teleport.setPosition(
+                                            teleport.getPosition().add(forward.scale(2))
+                                    );
+                                    store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+
+                                    close();
+                                });
+                            }
+                        }
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                    }
+
+                    break;
                 }
             }
-                //                case "DeleteEntity": {
-//                    // remove the entity
-//                    var playerData = getPlayerData();
-//                    var worldData = playerData.getWorldData();
-//                    var entityId = Integer.parseInt(data.entityId);
-//
-//                    worldData.Entities.remove(entityId);
-//                    playerData.Book.remove(entityId);
-//
-//                    buildEntitiesList(playerData, worldData, commandBuilder, eventBuilder, store);
-//                    break;
-//                }
-//            }
         }
 
         // fallback
@@ -531,9 +729,40 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         data -> data.entityId
                 )
                 .add()
+                // dropdown
+                .append(
+                        new KeyedCodec<>("@DropdownValue", Codec.STRING),
+                        (data, s) -> data.dropdown = s,
+                        data -> data.dropdown
+                )
+                .add()
+                // filter
+                .append(
+                        new KeyedCodec<>("@SearchInput", Codec.STRING),
+                        (data, s) -> {
+                            data.filter = s;
+                            if (data.filter == null) {
+                                data.filter = "";
+                            }
+                        },
+                        data -> data.filter
+                )
+                .add()
+                // warp
+                .append(
+                        new KeyedCodec<>("Warp", Codec.STRING),
+                        (data, s) -> {
+                            data.warp = s;
+                        },
+                        data -> data.warp
+                )
+                .add()
                 .build();
 
         private String button;
         private String entityId;
+        private String dropdown;
+        private String filter;
+        private String warp;
     }
 }

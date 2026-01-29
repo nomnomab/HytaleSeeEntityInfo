@@ -65,8 +65,20 @@ $E = "Common.ui";
       Anchor: (Top: 10);
     }
 
-    $C.@TextButton #ReloadButton {
-      Text: "Reload";
+    Group {
+      LayoutMode: Left;
+
+      $E.@InlineTextButton #ReloadButton {
+        Text: "reload";
+      }
+
+      Group {
+        Anchor: (Right: 5);
+      }
+
+      $E.@InlineTextButton #WorldTpButton {
+        Text: "tp";
+      }
     }
   }
 

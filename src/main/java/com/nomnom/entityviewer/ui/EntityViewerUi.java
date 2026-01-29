@@ -61,7 +61,10 @@
 //        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating, "#ReloadButton", EventData.of(Data.KEY_BUTTON, "ReloadButton"), false);
 //
 //        uiCommandBuilder.set("#SearchInput.Value", playerData.Filter);
-//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged, "#SearchInput", EventData.of(Data.KEY_FILTER, "#SearchInput.Value"), false);
+//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged,
+//        "#SearchInput",
+//        EventData.of(Data.KEY_FILTER, "#SearchInput.Value"),
+//        false);
 //    }
 //
 //    void buildWorldContent(@NonNullDecl PlayerData playerData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {

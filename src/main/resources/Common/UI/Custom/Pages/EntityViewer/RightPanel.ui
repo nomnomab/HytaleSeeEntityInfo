@@ -76,14 +76,6 @@ $E = "Common.ui";
     $E.@InlineTextButton #BringHereButton {
       @Text = "bring here";
     }
-
-    Group {
-      Anchor: (Right: 5);
-    }
-
-    $E.@InlineTextButton #KillButton {
-      @Text = "kill";
-    }
   }
 
   Group {
@@ -142,9 +134,9 @@ $E = "Common.ui";
       ScrollbarStyle: $C.@DefaultScrollbarStyle;
       Anchor: (Height: 290);
 
-      $E.@EntityComponentListItem {
-        @Text = "PhysicsValues";
-      }
+//      $E.@EntityComponentListItem {
+//        @Text = "PhysicsValues";
+//      }
     }
   }
 };

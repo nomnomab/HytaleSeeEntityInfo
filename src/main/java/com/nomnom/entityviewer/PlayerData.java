@@ -76,7 +76,9 @@ public class PlayerData {
     public EntityData getSelectedEntityData() {
         if (SelectedEntityId == -1) return null;
 
-        return getSelectedWorldData().Entities.get(SelectedEntityId);
+        var worldData = getSelectedWorldData();
+        if (worldData == null) return null;
+        return worldData.Entities.get(SelectedEntityId);
     }
 
     public void rebuildPage() {
