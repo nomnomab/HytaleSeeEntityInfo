@@ -96,25 +96,31 @@ $E = "Common.ui";
     Padding: (Horizontal: 8);
     //          Anchor: (Height: 215);
 
-    $E.@ListTitle {
+    $E.@ListTitle #EntityPropertiesCount {
       @Title = "Properties";
       @Text = "0";
     }
 
-//    $E.@EntityPropertyItem {
-//      @Key = "position";
-//      @Val = "-1026, 148.97, -73.03";
-//    }
-//
-//    $E.@EntityPropertyItem {
-//      @Key = "rotation";
-//      @Val = "0.46, 0.47, 0";
-//    }
-//
-//    $E.@EntityPropertyItem {
-//      @Key = "model";
-//      @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
-//    }
+    Group #EntityPropertiesList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Height: 200);
+
+      //    $E.@EntityPropertyItem {
+      //      @Key = "position";
+      //      @Val = "-1026, 148.97, -73.03";
+      //    }
+      //
+      //    $E.@EntityPropertyItem {
+      //      @Key = "rotation";
+      //      @Val = "0.46, 0.47, 0";
+      //    }
+      //
+      //    $E.@EntityPropertyItem {
+      //      @Key = "model";
+      //      @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
+      //    }
+    }
   }
 
   Group {
@@ -134,7 +140,7 @@ $E = "Common.ui";
     Group #EntityComponentsList {
       LayoutMode: TopScrolling;
       ScrollbarStyle: $C.@DefaultScrollbarStyle;
-      Anchor: (Height: 450);
+      Anchor: (Height: 290);
 
       $E.@EntityComponentListItem {
         @Text = "PhysicsValues";

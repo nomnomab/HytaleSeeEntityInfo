@@ -14,6 +14,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.*;
 import com.nomnom.entityviewer.ui.EntityViewerPage;
 import com.nomnom.entityviewer.ui.PageSignals;
+import com.nomnom.entityviewer.ui.ValueToString;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.text.NumberFormat;
@@ -124,6 +125,14 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         }
         _updateRealtimeElementsTimer = 0.0;
 
+        var world = store.getExternalData().getWorld();
+        for (var player : world.getPlayerRefs()) {
+            var playerData = EntityViewer.getPlayerData(player);
+            if (playerData == null) continue;
+
+            updateRealtimeEntityData(playerData, store);
+        }
+
         PageSignals.drawRealtimeElements();
     }
 
@@ -170,26 +179,16 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                                 var model = store.getComponent(entityRef, ModelComponent.getComponentType());
                                 if (model != null) {
                                     var rawModel = model.getModel();
-                                    entityData.Properties.put("model", rawModel.getModel());
+                                    entityData.StaticProperties.put("model", rawModel.getModel());
 
                                     entityData.ModelAssetId = rawModel.getModelAssetId();
-                                    entityData.Properties.put("model_asset_id", entityData.ModelAssetId);
+                                    entityData.StaticProperties.put("model_asset_id", entityData.ModelAssetId);
                                 }
                             }
                             case "Nameplate" -> {
                                 var nameplate = store.getComponent(entityRef, Nameplate.getComponentType());
                                 if (nameplate != null) {
-                                    entityData.Properties.put("nameplate", nameplate.getText());
-                                }
-                            }
-                            case "TransformComponent" -> {
-                                var transform = store.getComponent(entityRef, TransformComponent.getComponentType());
-                                if (transform != null) {
-                                    var pos = transform.getPosition();
-                                    entityData.Properties.put("position", _numberFormat.format(pos.x) + ", " + _numberFormat.format(pos.y) + ", " + _numberFormat.format(pos.z));
-
-                                    var rot = transform.getRotation();
-                                    entityData.Properties.put("rotation", _numberFormat.format(rot.x) + ", " + _numberFormat.format(rot.y) + ", " + _numberFormat.format(rot.z));
+                                    entityData.StaticProperties.put("nameplate", nameplate.getText());
                                 }
                             }
                         }
@@ -223,6 +222,34 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         worldData.DrawAll = true;
 
         EntityViewer.log("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
+    }
+
+    void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {
+        if (playerData.SelectedEntityId == -1) return;
+
+        var entityData = playerData.getSelectedEntityData();
+        if (entityData == null) return;
+
+        var entityRef = entityData.getRef(store.getExternalData().getWorld());
+        entityData.Properties.clear();
+
+        if (entityRef == null) return;
+
+        for (var component : entityData.Components) {
+            // if this is a DisplayNameComponent, push into the field
+            switch (component) {
+                case "TransformComponent" -> {
+                    var transform = store.getComponent(entityRef, TransformComponent.getComponentType());
+                    if (transform != null) {
+                        var pos = transform.getPosition();
+                        entityData.Properties.put("position", ValueToString.Vector3d(pos));
+
+                        var rot = transform.getRotation();
+                        entityData.Properties.put("rotation", ValueToString.Vector3f(rot));
+                    }
+                }
+            }
+        }
     }
 
     private static final List<Integer> _entitiesToRemove = new ArrayList<>();

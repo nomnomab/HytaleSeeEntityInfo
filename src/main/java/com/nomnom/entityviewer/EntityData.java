@@ -1,7 +1,10 @@
 package com.nomnom.entityviewer;
 
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +22,15 @@ public class EntityData {
     public String ModelAssetId;
     public String WorldName;
 
+    public Map<String, String> StaticProperties;
     public Map<String, String> Properties;
     public List<String> Components;
 
     public EntityData(int id) {
         Id = id;
         ElementId = "#Entity" + id;
-        Properties = new HashMap<>();
+        StaticProperties = new HashMap<>(8);
+        Properties = new HashMap<>(8);
     }
 
     public String getIconPath() {
@@ -39,5 +44,14 @@ public class EntityData {
         }
 
         return null;
+    }
+
+    public Ref<EntityStore> getRef(World world) {
+        if (UniqueId == null || UniqueIdString.isEmpty()) {
+            return null;
+        }
+
+        var store = world.getEntityStore();
+        return store.getRefFromUUID(UniqueId);
     }
 }

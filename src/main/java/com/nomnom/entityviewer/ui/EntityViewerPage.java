@@ -8,8 +8,8 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
 import com.hypixel.hytale.server.core.ui.LocalizableString;
@@ -234,6 +234,14 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     public void buildRealtimeElements(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
+        buildWorldDetails(playerData, ref, uiCommandBuilder, uiEventBuilder);
+
+        var store = ref.getStore();
+        var selectedEntity = playerData.getSelectedEntityData();
+        buildSelectedEntityProperties(selectedEntity, store, uiCommandBuilder, uiEventBuilder);
+    }
+
+    void buildWorldDetails(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         // world time
         var worldTime = getWorldTime(ref.getStore());
         var localTime = worldTime.getGameDateTime();
@@ -348,6 +356,27 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         }
     }
 
+    void buildSelectedEntityProperties(EntityData selectedEntity, @NonNullDecl Store<EntityStore> store, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
+        if (selectedEntity == null) return;
+
+        uiCommandBuilder.clear("#EntityPropertiesList");
+
+        var count = 0;
+        for (var property : selectedEntity.StaticProperties.keySet()) {
+            var value = selectedEntity.StaticProperties.get(property);
+            appendEntityPropertyItem("#EntityPropertiesList", count, property, value, uiCommandBuilder);
+            count++;
+        }
+
+        for (var property : selectedEntity.Properties.keySet()) {
+            var value = selectedEntity.Properties.get(property);
+            appendEntityPropertyItem("#EntityPropertiesList", count, property, value, uiCommandBuilder);
+            count++;
+        }
+
+        uiCommandBuilder.set("#EntityPropertiesCount #CountText.Text", String.valueOf(count));
+    }
+
     public void addEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
         EntityViewer.log("addEntity: " + entityData.Id);
 
@@ -371,6 +400,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
     void appendEntityPropertyItem(String root, @NonNullDecl UICommandBuilder uiCommandBuilder) {
         uiCommandBuilder.append(root, "Pages/EntityViewer/EntityPropertyItem.ui");
+    }
+
+    void appendEntityPropertyItem(String root, int index, String key, String value, @NonNullDecl UICommandBuilder uiCommandBuilder) {
+        uiCommandBuilder.append(root, "Pages/EntityViewer/EntityPropertyItem.ui");
+        setEntityPropertyItem(root + "[" + index + "]", key, value, uiCommandBuilder);
     }
 
     void setEntityPropertyItem(String selector, String key, String value, @NonNullDecl UICommandBuilder uiCommandBuilder) {

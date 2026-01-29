@@ -28,6 +28,7 @@ import com.nomnom.entityviewer.commands.ShowTestUiCommand;
 import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import com.nomnom.entityviewer.systems.ListenSystem;
 import com.nomnom.entityviewer.ui.PageSignals;
+import com.nomnom.entityviewer.ui.ValueToString;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -40,6 +41,7 @@ public class EntityViewer extends JavaPlugin {
     public static final int MAX_ENTRIES_PER_PAGE = 50;
 
     private static EntityViewer instance;
+    private static ValueToString _valueToString;
 
     private final List<CommandRegistration> _commands = new ArrayList<>(16);
     private final List<Registration> _events = new ArrayList<>(16);
@@ -48,6 +50,7 @@ public class EntityViewer extends JavaPlugin {
         super(init);
 
         instance = this;
+        _valueToString = new ValueToString();
 
         Players = new HashMap<>(32);
         Worlds = new HashMap<>(32);
