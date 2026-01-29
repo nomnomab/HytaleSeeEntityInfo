@@ -1,0 +1,19 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+Group {
+  @Text = "Name";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  FlexWeight: 1;
+
+  Label #ComponentName {
+    Style: (
+      FontSize: 12,
+    );
+    Padding: (Full: 6);
+    FlexWeight: 1;
+    Text: @Text;
+  }
+}

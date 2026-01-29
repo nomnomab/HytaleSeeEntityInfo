@@ -1,0 +1,41 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+Group {
+  @Text = "Duck";
+
+  LayoutMode: Left;
+  Background: #000000(0.13);
+  Padding: (Right: 8);
+  Anchor: (Height: 32);
+
+  TextButton #Button {
+    Padding: (Full: 6);
+    FlexWeight: 1;
+
+    Style: $E.@LabelStyle;
+    Text: @Text;
+  }
+
+  AssetImage #Icon {
+    Anchor: (Width: 32, Right: 5);
+//    Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 0);
+    Background: (Border: 0);
+    Visible: false;
+  }
+
+  Label #Id {
+    Style: (
+      ...$E.@MiniGrayLabelStyle,
+      VerticalAlignment: Center,
+    );
+    Text: "#23";
+  }
+
+//  TextButton #DeleteButton {
+//    Padding: (Full: 6);
+//
+//    Style: $E.@LabelStyle;
+//    Text: "Delete";
+//  }
+}

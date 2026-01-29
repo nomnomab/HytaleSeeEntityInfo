@@ -1,0 +1,11 @@
+$C = "../../Common.ui";
+$E = "Common.ui";
+
+TextButton #InlineTextButton {
+  Style: (
+    ...$E.@InlineTextButtonStyle,
+  );
+  Background: #000000(0.13);
+  Padding: (Horizontal: 12, Vertical: 5);
+  Text: "Text";
+}

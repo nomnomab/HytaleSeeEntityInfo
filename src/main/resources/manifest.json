@@ -11,7 +11,7 @@
     "Website": "example.org",
     "ServerVersion": "*",
     "Dependencies": {
-        
+        "Hytale:EntityModule": "*"
     },
     "OptionalDependencies": {
         

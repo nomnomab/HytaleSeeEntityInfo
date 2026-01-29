@@ -2,13 +2,18 @@ package com.nomnom.entityviewer;
 
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
-import com.hypixel.hytale.protocol.Packet;
-import com.hypixel.hytale.protocol.packets.interface_.Notification;
+import com.hypixel.hytale.event.IBaseEvent;
+import com.hypixel.hytale.protocol.packets.interface_.AddToServerPlayerList;
+import com.hypixel.hytale.protocol.packets.interface_.RemoveFromServerPlayerList;
 import com.hypixel.hytale.registry.Registration;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
+import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
-import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -18,18 +23,19 @@ import com.hypixel.hytale.server.core.universe.world.events.AddWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.events.AllWorldsLoadedEvent;
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.NotificationUtil;
 import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
 import com.nomnom.entityviewer.commands.ShowTestUiCommand;
-import com.nomnom.entityviewer.ui.EntityViewerSystem;
+import com.nomnom.entityviewer.systems.EntityViewerSystem;
+import com.nomnom.entityviewer.systems.ListenSystem;
+import com.nomnom.entityviewer.ui.PageSignals;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.logging.Level;
 
 public class EntityViewer extends JavaPlugin {
-    public volatile Map<UUID, PlayerData> Players;
-    public volatile Map<String, WorldData> Worlds;
+    public static volatile Map<UUID, PlayerData> Players;
+    public static volatile Map<String, WorldData> Worlds;
 
     public static final int MAX_ENTRIES_PER_PAGE = 50;
 
@@ -75,6 +81,7 @@ public class EntityViewer extends JavaPlugin {
         _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityviewer", "Shows the Entity Viewer")));
         _commands.add(this.getCommandRegistry().registerCommand(new ShowTestUiCommand("testui", "Shows the Entity Viewer")));
         this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
+        this.getEntityStoreRegistry().registerSystem(new ListenSystem());
     }
 
     @Override
@@ -92,6 +99,7 @@ public class EntityViewer extends JavaPlugin {
         _commands.clear();
 
         EntityStore.REGISTRY.unregisterSystem(EntityViewerSystem.class);
+        EntityStore.REGISTRY.unregisterSystem(ListenSystem.class);
 
         for (var e : _events) {
             e.unregister();
@@ -104,6 +112,9 @@ public class EntityViewer extends JavaPlugin {
         _events.add(this.getEventRegistry().registerGlobal(AllWorldsLoadedEvent.class, EntityViewer::onWorldsLoaded));
         _events.add(this.getEventRegistry().registerGlobal(AddWorldEvent.class, EntityViewer::onWorldAdded));
         _events.add(this.getEventRegistry().registerGlobal(RemoveWorldEvent.class, EntityViewer::onWorldRemoved));
+//        _events.add(this.getEventRegistry().registerGlobal(PlayerConnectEvent.class, EntityViewer::onPlayerJoined));
+        _events.add(this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, EntityViewer::onPlayerReady));
+        _events.add(this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, EntityViewer::onPlayerLeft));
 
         PacketAdapters.registerOutbound(ShowTestUiCommand::reopenWindow);
     }
@@ -120,7 +131,7 @@ public class EntityViewer extends JavaPlugin {
         log("worlds loaded: " + worlds.size());
 
         for (var world : worlds.values()) {
-            getInstance().registerWorld(world);
+            registerWorld(world);
         }
     }
 
@@ -128,57 +139,88 @@ public class EntityViewer extends JavaPlugin {
         var world = addWorldEvent.getWorld();
         log("World added: " + world.getName());
 
-        getInstance().registerWorld(world);
+        registerWorld(world);
     }
 
     private static void onWorldRemoved(RemoveWorldEvent removeWorldEvent) {
         var world = removeWorldEvent.getWorld();
         log("World removed: " + world.getName());
 
-        getInstance().unregisterWorld(world);
+        unregisterWorld(world);
     }
 
-    public void registerPlayer(PlayerRef playerRef) {
-        var uuid = playerRef.getUuid();
+//    private static void onPlayerJoined(PlayerConnectEvent playerConnectEvent) {
+//        registerPlayer(playerConnectEvent.getPlayerRef());
+//        PageSignals.drawAllPlayerLists();
+//    }
+
+    private static void onPlayerReady(PlayerReadyEvent playerReadyEvent) {
+        var ref = playerReadyEvent.getPlayerRef();
+        var uuid = ref.getStore().getComponent(ref, UUIDComponent.getComponentType());
+        assert uuid != null;
+
+        registerPlayer(uuid.getUuid());
+        PageSignals.drawAllPlayerLists();
+    }
+
+    private static void onPlayerLeft(PlayerDisconnectEvent playerDisconnectEvent) {
+        unregisterPlayer(playerDisconnectEvent.getPlayerRef());
+        PageSignals.drawAllPlayerLists();
+    }
+
+    public static void registerPlayer(UUID uuid) {
         if (!Players.containsKey(uuid)) {
-            log("Registering player " + playerRef);
-            Players.put(uuid, new PlayerData(uuid, playerRef));
-            log("Player " + playerRef + " has been registered");
+            log("Registering player " + uuid);
+            Players.put(uuid, new PlayerData(uuid));
+
+            PageSignals.drawAllPlayerLists();
         }
     }
 
-    public void unregisterPlayer(PlayerRef playerRef) {
+    public static void registerPlayer(PlayerRef playerRef) {
+        var uuid = playerRef.getUuid();
+        registerPlayer(uuid);
+    }
+
+    public static void unregisterPlayer(PlayerRef playerRef) {
         var uuid = playerRef.getUuid();
         if (!Players.containsKey(uuid)) return;
 
         log("Unregistering player " + playerRef);
         Players.remove(uuid);
-        log("Player " + playerRef + " has been unregistered");
+
+        PageSignals.drawAllPlayerLists();
     }
 
-    public WorldData getWorldData(World world) {
+    public static PlayerData getPlayerData(PlayerRef playerRef) {
+        var uuid = playerRef.getUuid();
+        return getPlayerData(uuid);
+    }
+
+    public static PlayerData getPlayerData(UUID uuid) {
+        return Players.get(uuid);
+    }
+
+    public static WorldData getWorldData(World world) {
         return getWorldData(world.getName());
     }
 
-    public WorldData getWorldData(String name) {
+    public static WorldData getWorldData(String name) {
         return Worlds.get(name);
     }
 
-    public void registerWorld(World world) {
+    public static void registerWorld(World world) {
         var name = world.getName();
         if (!Worlds.containsKey(name)) {
             log("Registering world " + world.getName());
             Worlds.put(name, new WorldData(world));
-            log("World " + name + " has been registered");
         }
     }
 
-    public void unregisterWorld(World world) {
+    public static void unregisterWorld(World world) {
         log("Unregistering world " + world.getName());
 
         var name = world.getName();
         Worlds.remove(name);
-
-        log("World " + name + " has been unregistered");
     }
 }

@@ -13,8 +13,9 @@ $E = "Common.ui";
     LayoutMode: Left;
 
     AssetImage #EntityIcon {
-      Background: (TexturePath: "../Memories/npcs/Duck.png", Border: 4);
+      Background: (Border: 4);
       Anchor: (Width: 64, Height: 64);
+//      Visible: false;
     }
 
     Group {
@@ -64,7 +65,7 @@ $E = "Common.ui";
     LayoutMode: Left;
     Padding: (Horizontal: 8);
 
-    $E.@InlineTextButton {
+    $E.@InlineTextButton #TpButton {
       @Text = "tp";
     }
 
@@ -72,7 +73,7 @@ $E = "Common.ui";
       Anchor: (Right: 5);
     }
 
-    $E.@InlineTextButton {
+    $E.@InlineTextButton #BringHereButton {
       @Text = "bring here";
     }
 
@@ -80,7 +81,7 @@ $E = "Common.ui";
       Anchor: (Right: 5);
     }
 
-    $E.@InlineTextButton {
+    $E.@InlineTextButton #KillButton {
       @Text = "kill";
     }
   }
@@ -97,23 +98,23 @@ $E = "Common.ui";
 
     $E.@ListTitle {
       @Title = "Properties";
-      @Text = "3";
+      @Text = "0";
     }
 
-    $E.@EntityPropertyItem {
-      @Key = "position";
-      @Val = "-1026, 148.97, -73.03";
-    }
-
-    $E.@EntityPropertyItem {
-      @Key = "rotation";
-      @Val = "0.46, 0.47, 0";
-    }
-
-    $E.@EntityPropertyItem {
-      @Key = "model";
-      @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
-    }
+//    $E.@EntityPropertyItem {
+//      @Key = "position";
+//      @Val = "-1026, 148.97, -73.03";
+//    }
+//
+//    $E.@EntityPropertyItem {
+//      @Key = "rotation";
+//      @Val = "0.46, 0.47, 0";
+//    }
+//
+//    $E.@EntityPropertyItem {
+//      @Key = "model";
+//      @Val = "NPC/Flying_Wildlife/Duck/Models/Model.blockymodel";
+//    }
   }
 
   Group {

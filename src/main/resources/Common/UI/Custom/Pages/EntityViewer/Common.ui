@@ -1,7 +1,7 @@
 $C = "../../Common.ui";
 
 @LeftPanelWidth = 300;
-@RightPanelWidth = 500;
+@RightPanelWidth = 400;
 
 // elements
 
@@ -62,31 +62,6 @@ $C = "../../Common.ui";
   }
 };
 
-@EntityPropertyItem = Group {
-  @Key = "key";
-  @Val = "value";
-  @ValWidth = 480;
-
-  LayoutMode: Left;
-
-  Label {
-    Style: @PropertyItemLabelStyle;
-    Text: @Key;
-
-    Anchor: (Width: 100);
-  }
-
-  Label {
-    Style: (
-      ...@PropertyItemLabelStyle,
-      Wrap: true
-    );
-    Text: @Val;
-
-    Anchor: (Right: 0, Width: @ValWidth);
-  }
-};
-
 @EntityComponentListItem = Group {
   @Text = "";
 
@@ -134,7 +109,7 @@ $C = "../../Common.ui";
   @Text = "0";
   LayoutMode: Left;
 
-  Label {
+  Label #Title {
     Style: (
       FontSize: 14,
       RenderBold: true,
@@ -147,7 +122,7 @@ $C = "../../Common.ui";
     FlexWeight: 1;
   }
 
-  Label {
+  Label #CountText {
     Style: @MiniGrayLabelStyle;
     Text: @Text;
   }

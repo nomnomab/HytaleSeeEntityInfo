@@ -44,7 +44,9 @@ $C.@DecoratedContainer {
         Anchor: (Right: 10);
       }
 
-      $RightPanel.@RightPanel #RightPanel {}
+      $RightPanel.@RightPanel #RightPanel {
+        Visible: false;
+      }
     }
   }
 

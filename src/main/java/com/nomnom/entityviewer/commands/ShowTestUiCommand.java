@@ -8,13 +8,10 @@ import com.hypixel.hytale.protocol.packets.interface_.Notification;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
-import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.EntityViewer;
-import com.nomnom.entityviewer.ui.EntityViewerUi;
 import com.nomnom.entityviewer.ui.TestPage;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 

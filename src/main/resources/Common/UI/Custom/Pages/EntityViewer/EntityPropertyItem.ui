@@ -1,0 +1,26 @@
+$E = "Common.ui";
+
+Group {
+  @Key = "key";
+  @Val = "value";
+  @ValWidth = 480;
+
+  LayoutMode: Left;
+
+  Label #Key {
+    Style: $E.@PropertyItemLabelStyle;
+    Text: @Key;
+
+    Anchor: (Width: 100);
+  }
+
+  Label #Value {
+    Style: (
+      ...$E.@PropertyItemLabelStyle,
+      Wrap: true
+    );
+    Text: @Val;
+
+    Anchor: (Right: 0, Width: @ValWidth);
+  }
+}

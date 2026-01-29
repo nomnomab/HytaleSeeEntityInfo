@@ -8,11 +8,15 @@ public class EntityViewerBook {
     public List<EntityData> Entities;
 
     public EntityViewerBook() {
-        Entities = new ArrayList<>();
+        Entities = new ArrayList<>(512);
     }
 
     public void clear() {
         Entities.clear();
+    }
+
+    public void remove(int entityId) {
+        Entities.removeIf(e -> e.Id == entityId);
     }
 
     public void filter(String filter, WorldData worldData) {

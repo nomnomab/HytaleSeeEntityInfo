@@ -15,17 +15,18 @@ $E = "Common.ui";
   Group #EntitiesList {
     LayoutMode: TopScrolling;
     ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    Anchor: (Bottom: 32);
 
-    $E.@EntityListItem {
-      @Text = "Duck";
-    }
-
-    $E.@EntityListItem {
-      @Text = "Duck";
-    }
-
-    $E.@EntityListItem {
-      @Text = "Duck";
-    }
+//    $E.@EntityListItem {
+//      @Text = "Duck";
+//    }
+//
+//    $E.@EntityListItem {
+//      @Text = "Duck";
+//    }
+//
+//    $E.@EntityListItem {
+//      @Text = "Duck";
+//    }
   }
 };

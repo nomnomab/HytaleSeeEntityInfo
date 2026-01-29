@@ -41,24 +41,32 @@ $E = "Common.ui";
       Text: "Details";
     }
 
-    Group #WorldProperties {
+    Group #WorldPropertiesList {
       LayoutMode: Top;
 
-      $E.@EntityPropertyItem {
-        @Key = "name";
-        @Val = "default";
-      }
+//      $E.@EntityPropertyItem #WorldName {
+//        @Key = "name";
+//        @Val = "default";
+//      }
+//
+//      $E.@EntityPropertyItem #WorldUUID {
+//        @Key = "uuid";
+//        @Val = "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
+//        @ValWidth = 175;
+//      }
+//
+//      $E.@EntityPropertyItem #WorldTime {
+//        @Key = "time";
+//        @Val = "Day 4, 11:32";
+//      }
+    }
 
-      $E.@EntityPropertyItem {
-        @Key = "uuid";
-        @Val = "35f82816-5eb5-3f60-b9b5-deb9d5eb8f5a";
-        @ValWidth = 175;
-      }
+    Group {
+      Anchor: (Top: 10);
+    }
 
-      $E.@EntityPropertyItem {
-        @Key = "time";
-        @Val = "Day 4, 11:32";
-      }
+    $C.@TextButton #ReloadButton {
+      Text: "Reload";
     }
   }
 
@@ -82,17 +90,17 @@ $E = "Common.ui";
       Anchor: (Height: 100);
       Background: #000000(0.13);
 
-      Group {
-        LayoutMode: Left;
-
-        $E.@EntityComponentListItem {
-          @Text = "nomnom";
-        }
-
-        $E.@InlineTextButton {
-          @Text = "tp";
-        }
-      }
+//      Group {
+//        LayoutMode: Left;
+//
+//        $E.@EntityComponentListItem {
+//          @Text = "nomnom";
+//        }
+//
+//        $E.@InlineTextButton {
+//          @Text = "tp";
+//        }
+//      }
     }
   }
 
