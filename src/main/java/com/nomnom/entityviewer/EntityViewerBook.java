@@ -32,80 +32,38 @@ public class EntityViewerBook {
             return;
         }
 
-        // for now just filter by any of the strings
+        // no prefix = name
+        // c         = component
+        // uuid      = uuid
+        var prefix = filter.contains(":") ? filter.substring(0, filter.indexOf(":")) : null;
+        var value = prefix == null ? filter : filter.substring(filter.indexOf(":") + 1);
         for (var entity : entities.values()) {
-            if (!entity.WorldName.equals(worldData.Name)) {
-                continue;
-            }
-
-            if (entity.DisplayName != null && entity.DisplayName.contains(filter)) {
-                Entities.add(entity);
-                continue;
-            }
-
-            if (entity.UniqueIdString != null && entity.UniqueIdString.contains(filter)) {
-                Entities.add(entity);
-                continue;
-            }
-
-            var found = false;
-            for (var value : entity.Properties.values()) {
-                if (value.contains(filter)) {
+            if (prefix == null) {
+                if (entity.DisplayName != null && entity.DisplayName.contains(value)) {
                     Entities.add(entity);
-                    found = true;
+                }
+
+                continue;
+            }
+
+            switch (prefix) {
+                case "c": {
+                    for (var component : entity.Components) {
+                        if (component.contains(value)) {
+                            Entities.add(entity);
+                            break;
+                        }
+                    }
+                    break;
+                }
+
+                case "uuid": {
+                    if (entity.UniqueIdString != null && entity.UniqueIdString.contains(value)) {
+                        Entities.add(entity);
+                    }
                     break;
                 }
             }
-
-            if (found) continue;
-
-            for (var component : entity.Components) {
-                if (component.contains(filter)) {
-                    Entities.add(entity);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) continue;
-
-            // not found
         }
     }
-
-//    public Page getPage(int index, int perPage) {
-//        EntityViewer.getInstance().getLogger().atInfo().log("getPage");
-//
-//        var start = index * perPage;
-//        var end = start + perPage;
-//
-//        end = Math.min(end, Entities.size());
-//        start = Math.min(start, end);
-//
-//        return new Page(start, end);
-//    }
-
-    public void iterPage(int index, int perPage, Consumer<EntityData> consumer) {
-        var start = index * perPage;
-        var end = start + perPage;
-
-        end = Math.min(end, Entities.size());
-        start = Math.min(start, end);
-
-        if (start == end) return;
-
-        for (int i = start; i < end; i++) {
-            var entity = Entities.get(i);
-            consumer.accept(entity);
-        }
-    }
-
-//    public static class Page {
-//        public int Start, End;
-//
-//        public Page(int start, int end) {
-//            this.Start = start;
-//            this.End = end;
-//        }
-//    }
 }

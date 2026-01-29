@@ -524,7 +524,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         // filter
         if (data.filter != null) {
-            EntityViewer.log("Filtering " + data.filter);
+//            EntityViewer.log("Filtering " + data.filter);
 
             var playerData = getPlayerData();
             playerData.Filter = data.filter;
@@ -536,8 +536,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         // button
         if (data.button != null) {
-            EntityViewer.log("data.button: " + data.button);
-            EntityViewer.log("data.entityId: " + data.entityId);
+//            EntityViewer.log("data.button: " + data.button);
+//            EntityViewer.log("data.entityId: " + data.entityId);
 
             switch (data.button) {
                 // reload the whole lookup for the world
