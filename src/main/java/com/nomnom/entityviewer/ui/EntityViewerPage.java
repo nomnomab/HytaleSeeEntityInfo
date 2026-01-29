@@ -207,12 +207,15 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         if (world == null) return;
 
         var warps = TeleportPlugin.get().getWarps().values();
-        uiCommandBuilder.set("#WorldTeleportersCount #CountText.Text", String.valueOf(warps.size()));
-
         uiCommandBuilder.clear("#WorldTeleportersList");
 
         var index = 0;
         for (var warp : warps) {
+            // restrict warps to this world only
+            if (!warp.getWorld().equals(worldData.Name)) {
+                continue;
+            }
+
             uiCommandBuilder.append("#WorldTeleportersList", "Pages/EntityViewer/ListItem.ui");
             uiCommandBuilder.set("#WorldTeleportersList[" + index + "] #Name.Text", warp.getId());
 
@@ -227,6 +230,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
             index++;
         }
+        uiCommandBuilder.set("#WorldTeleportersCount #CountText.Text", String.valueOf(index));
     }
 
     // entity list
@@ -629,6 +633,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                     break;
                 }
 
+                // changes the world shown in the page for the player
                 case "World_Switch": {
                     var worldName = data.dropdown;
                     try {
@@ -646,6 +651,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                     break;
                 }
 
+                // tp the player to this world
                 case "World_GoTo": {
                     try {
                         var playerData = getPlayerData();
@@ -669,6 +675,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                     break;
                 }
 
+                // tp the player to this teleporter
                 case "Teleporter_Warp": {
                     var warps = TeleportPlugin.get().getWarps().values();
                     var wantedWarp = data.warp;

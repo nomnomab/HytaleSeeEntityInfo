@@ -2,15 +2,13 @@ package com.nomnom.entityviewer;
 
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
-import com.hypixel.hytale.event.IBaseEvent;
-import com.hypixel.hytale.protocol.packets.interface_.AddToServerPlayerList;
-import com.hypixel.hytale.protocol.packets.interface_.RemoveFromServerPlayerList;
+import com.hypixel.hytale.protocol.Packet;
+import com.hypixel.hytale.protocol.packets.interface_.Notification;
 import com.hypixel.hytale.registry.Registration;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
-import com.hypixel.hytale.server.core.event.events.player.AddPlayerToWorldEvent;
-import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
@@ -24,7 +22,6 @@ import com.hypixel.hytale.server.core.universe.world.events.AllWorldsLoadedEvent
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
-import com.nomnom.entityviewer.commands.ShowTestUiCommand;
 import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import com.nomnom.entityviewer.systems.ListenSystem;
 import com.nomnom.entityviewer.ui.PageSignals;
@@ -37,8 +34,6 @@ import java.util.logging.Level;
 public class EntityViewer extends JavaPlugin {
     public static volatile Map<UUID, PlayerData> Players;
     public static volatile Map<String, WorldData> Worlds;
-
-    public static final int MAX_ENTRIES_PER_PAGE = 50;
 
     private static EntityViewer instance;
     private static ValueToString _valueToString;
@@ -82,7 +77,6 @@ public class EntityViewer extends JavaPlugin {
         registerCommands();
 
         _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityviewer", "Shows the Entity Viewer")));
-        _commands.add(this.getCommandRegistry().registerCommand(new ShowTestUiCommand("testui", "Shows the Entity Viewer")));
         this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
         this.getEntityStoreRegistry().registerSystem(new ListenSystem());
     }
@@ -119,7 +113,7 @@ public class EntityViewer extends JavaPlugin {
         _events.add(this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, EntityViewer::onPlayerReady));
         _events.add(this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, EntityViewer::onPlayerLeft));
 
-        PacketAdapters.registerOutbound(ShowTestUiCommand::reopenWindow);
+        PacketAdapters.registerOutbound(EntityViewer::reopenPage);
     }
 
     private void registerCommands() {}
@@ -169,6 +163,45 @@ public class EntityViewer extends JavaPlugin {
     private static void onPlayerLeft(PlayerDisconnectEvent playerDisconnectEvent) {
         unregisterPlayer(playerDisconnectEvent.getPlayerRef());
         PageSignals.drawAllPlayerLists();
+    }
+
+    // reloads my page when the asset changes automatically
+    private static boolean reopenPage(PlayerRef playerRef, Packet packet) {
+        if (!(packet instanceof Notification notification)) {
+            return false;
+        }
+
+        // bad message content
+        if (notification.secondaryMessage == null) return false;
+        var rawText = notification.secondaryMessage.rawText;
+        if (rawText == null) return false;
+
+        // not from me
+        if (!notification.secondaryMessage.rawText.startsWith("com.nomnom:Entity Viewer:UI/Custom/Pages")) {
+            return false;
+        }
+
+        // get store
+        var ref = playerRef.getReference();
+        var store = ref != null ? ref.getStore() : null;
+        if (store == null) return false;
+
+        // manage page
+        var player = store.getComponent(ref, Player.getComponentType());
+        var pageManager = player != null ? player.getPageManager() : null;
+        if (pageManager == null)  return false;
+
+        var page = pageManager.getCustomPage();
+        if  (page == null) return false;
+
+        var pageClass = page.getClass();
+        EntityViewer.log("package: " + pageClass.getPackageName());
+
+        if (pageClass.getPackageName().startsWith("com.nomnom.entityviewer")) {
+            pageManager.openCustomPage(ref, store, page);
+        }
+
+        return false;
     }
 
     public static void registerPlayer(UUID uuid) {
