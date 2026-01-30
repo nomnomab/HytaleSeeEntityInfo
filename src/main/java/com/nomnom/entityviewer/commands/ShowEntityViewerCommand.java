@@ -25,11 +25,15 @@ public class ShowEntityViewerCommand extends AbstractPlayerCommand {
         var player = commandContext.senderAs(Player.class);
 
         CompletableFuture.runAsync(() -> {
-            var page = new EntityViewerPage(playerRef, CustomPageLifetime.CanDismiss);
-            player.getPageManager().openCustomPage(ref, store, page);
-
-            var playerData = EntityViewer.getPlayerData(playerRef);
-            playerData.getSelectedWorldData().RebuildEntityLookup = true;
+            openPage(playerRef, player, ref, store);
         });
+    }
+
+    public static void openPage(PlayerRef playerRef, Player player, Ref<EntityStore> ref, Store<EntityStore> store) {
+        var page = new EntityViewerPage(playerRef, CustomPageLifetime.CanDismiss);
+        player.getPageManager().openCustomPage(ref, store, page);
+
+        var playerData = EntityViewer.getPlayerData(playerRef);
+        playerData.getSelectedWorldData().RebuildEntityLookup = true;
     }
 }

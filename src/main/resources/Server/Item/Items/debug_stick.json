@@ -1,0 +1,66 @@
+{
+  "TranslationProperties": {
+    "Name": "items.entityViewer.tools.DebugStick.name",
+    "Description": "items.entityViewer.tools.DebugStick.description"
+  },
+  "Id": "Debug_Stick",
+  "Icon": "Icons/ItemsGenerated/Debug_Stick.png",
+  "Model": "Items/debug_stick/Stick.blockymodel",
+  "Texture": "Items/Halloween_Props/Broomstick_Texture.png",
+  "MaxStack": 1,
+  "Categories": [
+    "Tool.BuilderTool"
+  ],
+  "PlayerAnimationsId": "Item",
+  "BuilderTool": {
+    "UI": [],
+    "Tools": [
+      {
+        "Id": "DebugStick",
+        "IsBrush": false
+      }
+    ]
+  },
+  "Interactions": {
+    "Primary": {
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "Effects": {
+            "ItemAnimationId": "Interact"
+          },
+          "RunTime": 0.05,
+          "Next": {
+            "Type": "debug_stick_interaction",
+            "Failed": {
+              "Type": "Simple",
+              "Effects": {
+                "LocalSoundEventId": "SFX_Capture_Crate_Capture_Fail_Local"
+              }
+            },
+            "Next": {
+              "Type": "Simple",
+              "Effects": {
+                "LocalSoundEventId": "SFX_Capture_Crate_Capture_Succeed_Local",
+                "WorldSoundEventId": "SFX_Capture_Crate_Capture_Succeed"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "InteractionConfig": {
+    "DebugOutlines": true,
+    "UseDistance": {
+      "Adventure": 128,
+      "Creative": 128
+    },
+    "AllEntities": true,
+    "DisplayOutlines": true
+  },
+  "Quality": "Tool",
+  "Utility": {
+    "Compatible": true
+  }
+}

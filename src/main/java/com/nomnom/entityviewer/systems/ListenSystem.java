@@ -13,22 +13,10 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 public class ListenSystem extends RefSystem<EntityStore> {
     @Override
     public void onEntityAdded(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl AddReason addReason, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer) {
-        var index = ref.getIndex();
         var world = store.getExternalData().getWorld();
         var worldData = EntityViewer.getWorldData(world);
-        var entity = worldData.Entities.get(index);
-        if (entity == null) {
-            return;
-        }
 
-        var uuidFrom = store.getComponent(ref, UUIDComponent.getComponentType()).getUuid();
-        var uuidTo = entity.UniqueId;
-
-        if (!uuidFrom.equals(uuidTo)) {
-            EntityViewer.warn("UUIDs don't match! " + uuidFrom + " != " + uuidTo);
-            return;
-        }
-
+        var entity = worldData.addEntity(ref, store);
         PageSignals.onCreateEntity(worldData, entity);
     }
 

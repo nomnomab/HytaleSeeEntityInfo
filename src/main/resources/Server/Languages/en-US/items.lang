@@ -1,0 +1,2 @@
+entityViewer.tools.DebugStick.name = Debug Stick
+entityViewer.tools.DebugStick.description = Allows you to hit an entity to show their information.

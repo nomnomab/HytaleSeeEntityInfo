@@ -60,10 +60,10 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 //        }
 
         // check for invalid entities, such as non-valid or missing
-        if (worldData.ValidateTimer >= 5.0) {
-            worldData.ValidateTimer = 0;
-            checkForInvalidEntities(worldData, store);
-        }
+//        if (worldData.ValidateTimer >= 5.0) {
+//            worldData.ValidateTimer = 0;
+//            checkForInvalidEntities(worldData, store);
+//        }
     }
 
     void updateDraw(WorldData worldData, @NonNullDecl Store<EntityStore> store) {
@@ -142,82 +142,12 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         worldData.Chunks = store.collectArchetypeChunkData();
 
         var world = worldData.getWorld();
-
         // remake the database
         store.forEachChunk((chunk, cmd) -> {
-            var archetype = chunk.getArchetype();
-            var archetypeData = new ArchetypeData();
-
             for (int i = 0; i < chunk.size(); i++) {
                 var entityRef = chunk.getReferenceTo(i);
-                var entityId = entityRef.getIndex();
-
-                archetypeData.Entities.add(entityId);
-
-                var entityData = new EntityData(entityId);
-                entityData.WorldName = worldData.Name;
-//                entityData.DisplayName = entityRef.toString();
-
-                // collect components
-                entityData.Components = new ArrayList<>();
-                for (int j = archetype.getMinIndex(); j < archetype.length(); j++) {
-                    var compType = archetype.get(j);
-                    if (compType != null) {
-                        var componentName = TypeNameUtil.getSimpleName(compType.getTypeClass().getName());
-                        entityData.Components.add(componentName);
-
-                        // can check componentName.equals then store.getComponent
-
-                        // if this is a DisplayNameComponent, push into the field
-                        switch (componentName) {
-                            case "DisplayNameComponent" -> {
-                                var displayName = store.getComponent(entityRef, DisplayNameComponent.getComponentType());
-                                if (displayName != null && displayName.getDisplayName() != null) {
-                                    entityData.DisplayName = displayName.getDisplayName().getRawText();
-                                }
-                            }
-                            case "ModelComponent" -> {
-                                var model = store.getComponent(entityRef, ModelComponent.getComponentType());
-                                if (model != null) {
-                                    var rawModel = model.getModel();
-                                    entityData.StaticProperties.put("model", rawModel.getModel());
-
-                                    entityData.ModelAssetId = rawModel.getModelAssetId();
-                                    entityData.StaticProperties.put("model_asset_id", entityData.ModelAssetId);
-                                }
-                            }
-                            case "Nameplate" -> {
-                                var nameplate = store.getComponent(entityRef, Nameplate.getComponentType());
-                                if (nameplate != null) {
-                                    entityData.StaticProperties.put("nameplate", nameplate.getText());
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // get uuid if possible
-                if (entityData.UniqueIdString == null) {
-                    var uuid = store.getComponent(entityRef, UUIDComponent.getComponentType());
-                    if (uuid != null) {
-                        entityData.UniqueId = uuid.getUuid();
-                        entityData.UniqueIdString = entityData.UniqueId.toString();
-                    }
-                }
-
-                // show the display name if possible
-                if (entityData.DisplayName == null || entityData.DisplayName.isEmpty()) {
-                    if (entityData.ModelAssetId != null) {
-                        entityData.DisplayName = entityData.ModelAssetId;
-                    } else {
-                        entityData.DisplayName = entityData.UniqueIdString;
-                    }
-                }
-
-                worldData.Entities.put(entityId, entityData);
+                worldData.addEntity(entityRef, store);
             }
-
-            worldData.Archetypes.add(archetypeData);
         });
 
         worldData.DrawAll = true;

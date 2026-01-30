@@ -12,6 +12,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -22,6 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.events.AllWorldsLoadedEvent
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
+import com.nomnom.entityviewer.items.DebugStickInteraction;
 import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import com.nomnom.entityviewer.systems.ListenSystem;
 import com.nomnom.entityviewer.ui.PageSignals;
@@ -79,6 +81,7 @@ public class EntityViewer extends JavaPlugin {
         _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityviewer", "Shows the Entity Viewer")));
         this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
         this.getEntityStoreRegistry().registerSystem(new ListenSystem());
+        this.getCodecRegistry(Interaction.CODEC).register("debug_stick_interaction", DebugStickInteraction.class, DebugStickInteraction.CODEC);
     }
 
     @Override

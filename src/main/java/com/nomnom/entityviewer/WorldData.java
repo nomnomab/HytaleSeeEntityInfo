@@ -1,9 +1,15 @@
 package com.nomnom.entityviewer;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.metric.ArchetypeChunkData;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
+import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
+import com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent;
+import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.*;
 
@@ -12,7 +18,6 @@ public class WorldData {
     public final String Name;
 
     public volatile ArchetypeChunkData[] Chunks;
-    public volatile List<ArchetypeData> Archetypes;
     public volatile Map<Integer, EntityData> Entities;
 
     public double ValidateTimer;
@@ -33,7 +38,6 @@ public class WorldData {
         Name = world.getName();
 
         Chunks = new ArchetypeChunkData[0];
-        Archetypes = new ObjectArrayList<>(512);
         Entities = new HashMap<>(512);
 
         EntityChanges = new ArrayList<>(256);
@@ -46,7 +50,6 @@ public class WorldData {
     }
 
     public void clear() {
-        Archetypes.clear();
         Entities.clear();
     }
 
@@ -56,6 +59,90 @@ public class WorldData {
         DrawPlayerList = false;
         DrawTeleportersList = false;
         DrawEntitiesList = false;
+    }
+
+    public EntityData getEntityFromUUID(UUID uuid) {
+        for (var entity : Entities.values()) {
+            if (entity.UniqueId.equals(uuid)) {
+                return entity;
+            }
+        }
+
+        return null;
+    }
+
+    public EntityData addEntity(Ref<EntityStore> entityRef, Store<EntityStore> store) {
+        var entityId = entityRef.getIndex();
+
+        var entityData = Entities.get(entityId);
+        if (entityData == null) {
+            entityData = new EntityData(entityId);
+        }
+        entityData.WorldName = Name;
+
+        // collect components
+        if (entityData.Components != null) {
+            entityData.Components.clear();
+        } else {
+            entityData.Components = new ArrayList<>();
+        }
+
+        var archetype = entityRef.getStore().getArchetype(entityRef);
+        for (int j = archetype.getMinIndex(); j < archetype.length(); j++) {
+            var compType = archetype.get(j);
+            if (compType != null) {
+                var componentName = TypeNameUtil.getSimpleName(compType.getTypeClass().getName());
+                entityData.Components.add(componentName);
+
+                // can check componentName.equals then store.getComponent
+                // if this is a DisplayNameComponent, push into the field
+                switch (componentName) {
+                    case "DisplayNameComponent" -> {
+                        var displayName = store.getComponent(entityRef, DisplayNameComponent.getComponentType());
+                        if (displayName != null && displayName.getDisplayName() != null) {
+                            entityData.DisplayName = displayName.getDisplayName().getRawText();
+                        }
+                    }
+                    case "ModelComponent" -> {
+                        var model = store.getComponent(entityRef, ModelComponent.getComponentType());
+                        if (model != null) {
+                            var rawModel = model.getModel();
+                            entityData.StaticProperties.put("model", rawModel.getModel());
+
+                            entityData.ModelAssetId = rawModel.getModelAssetId();
+                            entityData.StaticProperties.put("model_asset_id", entityData.ModelAssetId);
+                        }
+                    }
+                    case "Nameplate" -> {
+                        var nameplate = store.getComponent(entityRef, Nameplate.getComponentType());
+                        if (nameplate != null) {
+                            entityData.StaticProperties.put("nameplate", nameplate.getText());
+                        }
+                    }
+                }
+            }
+        }
+
+        // get uuid if possible
+        if (entityData.UniqueIdString == null) {
+            var uuid = store.getComponent(entityRef, UUIDComponent.getComponentType());
+            if (uuid != null) {
+                entityData.UniqueId = uuid.getUuid();
+                entityData.UniqueIdString = entityData.UniqueId.toString();
+            }
+        }
+
+        // show the display name if possible
+        if (entityData.DisplayName == null || entityData.DisplayName.isEmpty()) {
+            if (entityData.ModelAssetId != null) {
+                entityData.DisplayName = entityData.ModelAssetId;
+            } else {
+                entityData.DisplayName = entityData.UniqueIdString;
+            }
+        }
+
+        Entities.put(entityId, entityData);
+        return entityData;
     }
 
     public void removeEntity(int entityId) {
