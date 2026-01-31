@@ -2,7 +2,7 @@ package com.nomnom.entityviewer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.UUID;
 
 public class EntityViewerBook {
     public List<EntityData> Entities;
@@ -15,8 +15,8 @@ public class EntityViewerBook {
         Entities.clear();
     }
 
-    public void remove(int entityId) {
-        Entities.removeIf(e -> e.Id == entityId);
+    public void remove(UUID uuid) {
+        Entities.removeIf(e -> e.UUID.equals(uuid));
     }
 
     public void filter(String filter, WorldData worldData) {
@@ -58,7 +58,7 @@ public class EntityViewerBook {
                 }
 
                 case "uuid": {
-                    if (entity.UniqueIdString != null && entity.UniqueIdString.contains(value)) {
+                    if (entity.UUIDString != null && entity.UUIDString.contains(value)) {
                         Entities.add(entity);
                     }
                     break;

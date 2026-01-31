@@ -24,15 +24,15 @@ public class PageSignals {
     }
 
     public static void onCreateEntity(WorldData worldData, EntityData entityData) {
-        EntityViewer.log("onCreateEntity: " + entityData.Id + ", uuid: " + entityData.UniqueId);
+        EntityViewer.log("onCreateEntity: uuid: " + entityData.UUID);
 
-        worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.ADD, entityData.Id, entityData));
+        worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.ADD, entityData.UUID, entityData));
     }
 
     public static void onDestroyEntity(WorldData worldData, EntityData entityData) {
-        EntityViewer.log("onDestroyEntity: " + entityData.Id + ", uuid: " + entityData.UniqueId);
+        EntityViewer.log("onDestroyEntity: uuid: " + entityData.UUID);
 
-        worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.REMOVE, entityData.Id, entityData));
+        worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.REMOVE, entityData.UUID, entityData));
     }
 
     /// Rebuild all pages.
@@ -44,9 +44,13 @@ public class PageSignals {
 
     /// Rebuild all pages for a specific world.
     public static void rebuildPages(WorldData worldData) {
+        EntityViewer.log("rebuildPages: " + worldData.EntityChanges.size());
         for (var playerRef : worldData.getWorld().getPlayerRefs()) {
+            EntityViewer.log("playerRef");
             var playerData = EntityViewer.getPlayerData(playerRef);
             if (playerData == null) continue;
+
+            EntityViewer.log("rebuilding for player " + playerData.UUID.toString());
 
             playerData.rebuildPage();
         }

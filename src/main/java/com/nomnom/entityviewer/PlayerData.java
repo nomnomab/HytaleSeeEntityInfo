@@ -13,7 +13,7 @@ public class PlayerData {
 
     public String Filter;
     public String SelectedWorldName;
-    public int SelectedEntityId = -1;
+    public UUID SelectedEntity;
 
     public EntityViewerPage Page;
     public EntityViewerBook Book;
@@ -74,11 +74,11 @@ public class PlayerData {
     }
 
     public EntityData getSelectedEntityData() {
-        if (SelectedEntityId == -1) return null;
+        if (SelectedEntity == null) return null;
 
         var worldData = getSelectedWorldData();
         if (worldData == null) return null;
-        return worldData.Entities.get(SelectedEntityId);
+        return worldData.Entities.get(SelectedEntity);
     }
 
     public void rebuildPage() {
@@ -88,7 +88,6 @@ public class PlayerData {
 
     public void buildRealtimeElements() {
         if (Page == null) return;
-//        if (!Page.canUpdate()) return;
         Page.buildRealtimeElements();
     }
 

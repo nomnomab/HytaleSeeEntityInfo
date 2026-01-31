@@ -22,7 +22,11 @@ public class ListenSystem extends RefSystem<EntityStore> {
 
     @Override
     public void onEntityRemove(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl RemoveReason removeReason, @NonNullDecl Store<EntityStore> store, @NonNullDecl CommandBuffer<EntityStore> commandBuffer) {
+        var world = store.getExternalData().getWorld();
+        var worldData = EntityViewer.getWorldData(world);
 
+        var entity = worldData.addEntity(ref, store);
+        PageSignals.onDestroyEntity(worldData, entity);
     }
 
     @NullableDecl

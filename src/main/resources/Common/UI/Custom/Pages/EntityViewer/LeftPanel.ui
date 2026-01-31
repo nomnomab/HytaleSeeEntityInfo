@@ -27,7 +27,7 @@ $E = "Common.ui";
   }
 
   // World details
-  Group {
+  Group #WorldDetails {
     LayoutMode: Top;
     Padding: (Horizontal: 4);
     Anchor: (Height: 330);

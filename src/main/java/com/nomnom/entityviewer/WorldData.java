@@ -18,7 +18,7 @@ public class WorldData {
     public final String Name;
 
     public volatile ArchetypeChunkData[] Chunks;
-    public volatile Map<Integer, EntityData> Entities;
+    public volatile Map<UUID, EntityData> Entities;
 
     public double ValidateTimer;
 
@@ -27,7 +27,6 @@ public class WorldData {
 
     // draw flags
     public boolean DrawAll;
-    public boolean DrawRealtimeElements;
     public boolean DrawPlayerList;
     public boolean DrawTeleportersList;
     public boolean DrawEntitiesList;
@@ -55,29 +54,20 @@ public class WorldData {
 
     public void resetDrawFlags() {
         DrawAll = false;
-        DrawRealtimeElements = false;
         DrawPlayerList = false;
         DrawTeleportersList = false;
         DrawEntitiesList = false;
     }
 
-    public EntityData getEntityFromUUID(UUID uuid) {
-        for (var entity : Entities.values()) {
-            if (entity.UniqueId.equals(uuid)) {
-                return entity;
-            }
-        }
-
-        return null;
-    }
-
     public EntityData addEntity(Ref<EntityStore> entityRef, Store<EntityStore> store) {
         var entityId = entityRef.getIndex();
+        var entityStore = entityRef.getStore();
+        var archetype = entityStore.getArchetype(entityRef);
 
-        var entityData = Entities.get(entityId);
-        if (entityData == null) {
-            entityData = new EntityData(entityId);
-        }
+        var uuidComponent = entityStore.getComponent(entityRef, UUIDComponent.getComponentType());
+        assert uuidComponent != null;
+
+        var entityData = new EntityData(entityId, uuidComponent.getUuid());
         entityData.WorldName = Name;
 
         // collect components
@@ -87,7 +77,6 @@ public class WorldData {
             entityData.Components = new ArrayList<>();
         }
 
-        var archetype = entityRef.getStore().getArchetype(entityRef);
         for (int j = archetype.getMinIndex(); j < archetype.length(); j++) {
             var compType = archetype.get(j);
             if (compType != null) {
@@ -123,30 +112,21 @@ public class WorldData {
             }
         }
 
-        // get uuid if possible
-        if (entityData.UniqueIdString == null) {
-            var uuid = store.getComponent(entityRef, UUIDComponent.getComponentType());
-            if (uuid != null) {
-                entityData.UniqueId = uuid.getUuid();
-                entityData.UniqueIdString = entityData.UniqueId.toString();
-            }
-        }
-
         // show the display name if possible
         if (entityData.DisplayName == null || entityData.DisplayName.isEmpty()) {
             if (entityData.ModelAssetId != null) {
                 entityData.DisplayName = entityData.ModelAssetId;
             } else {
-                entityData.DisplayName = entityData.UniqueIdString;
+                entityData.DisplayName = entityData.UUIDString;
             }
         }
 
-        Entities.put(entityId, entityData);
+        Entities.put(entityData.UUID, entityData);
         return entityData;
     }
 
-    public void removeEntity(int entityId) {
-        Entities.remove(entityId);
+    public void removeEntity(UUID uuid) {
+        Entities.remove(uuid);
 
         var world = getWorld();
         var worldData = EntityViewer.getWorldData(world);
@@ -155,7 +135,7 @@ public class WorldData {
         for (var playerRef : world.getPlayerRefs()) {
             var playerData = EntityViewer.getPlayerData(playerRef);
             if (playerData != null) {
-                playerData.Book.remove(entityId);
+                playerData.Book.remove(uuid);
             }
         }
 
@@ -174,12 +154,12 @@ public class WorldData {
 
     public static class EntityChange {
         public EntityChangeType ChangeType;
-        public Integer Id;
+        public UUID UUID;
         public EntityData EntityData;
 
-        public EntityChange (EntityChangeType changeType, Integer id, EntityData entityData) {
+        public EntityChange (EntityChangeType changeType, UUID uuid, EntityData entityData) {
             ChangeType = changeType;
-            Id = id;
+            UUID = uuid;
             EntityData = entityData;
         }
     }

@@ -2,11 +2,6 @@ package com.nomnom.entityviewer.systems;
 
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
-import com.hypixel.hytale.server.core.entity.UUIDComponent;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.nameplate.Nameplate;
-import com.hypixel.hytale.server.core.modules.entity.component.DisplayNameComponent;
-import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -58,6 +53,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
     void updateDraw(WorldData worldData, @NonNullDecl Store<EntityStore> store) {
         if (worldData.DrawAll) {
             worldData.resetDrawFlags();
+            updateRealtimeElements(100, worldData, store);
             PageSignals.rebuildPages(worldData);
             return;
         }
@@ -90,13 +86,16 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
                 for (var change : worldData.EntityChanges) {
                     var entityData = change.EntityData;
                     if (entityData == null) {
-                        entityData = worldData.Entities.get(change.Id);
+                        entityData = worldData.Entities.get(change.UUID);
                     }
                     if (entityData == null) continue;
 
                     switch (change.ChangeType) {
                         case ADD -> page.addEntity(entityData, uiCommandBuilder, uiEventBuilder);
-                        case REMOVE -> page.removeEntity(entityData, uiCommandBuilder, uiEventBuilder);
+                        case REMOVE -> {
+                            worldData.Entities.remove(entityData.UUID);
+                            page.removeEntity(entityData, uiCommandBuilder, uiEventBuilder);
+                        }
                     }
                 }
 
@@ -110,25 +109,22 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
     void updateRealtimeElements(float dt, WorldData worldData, @NonNullDecl Store<EntityStore> store) {
         // todo: wait for Hytale to support this without eating inputs
-        return;
 
-//        _updateRealtimeElementsTimer += dt;
-//        if (!worldData.DrawRealtimeElements && !(_updateRealtimeElementsTimer >= 0.1)) {
-//            return;
-//        }
-//        _updateRealtimeElementsTimer = 0.0;
-//        worldData.DrawRealtimeElements = false;
-//
-//        var world = store.getExternalData().getWorld();
-//        for (var player : world.getPlayerRefs()) {
-//            var playerData = EntityViewer.getPlayerData(player);
-//            if (playerData == null) continue;
-//            if (playerData.Page == null) continue;
-////            if (!playerData.Page.canUpdate()) continue;
-//
-//            updateRealtimeEntityData(playerData, store);
+        _updateRealtimeElementsTimer += dt;
+        if (!(_updateRealtimeElementsTimer >= 0.1)) {
+            return;
+        }
+        _updateRealtimeElementsTimer = 0.0;
+
+        var world = store.getExternalData().getWorld();
+        for (var player : world.getPlayerRefs()) {
+            var playerData = EntityViewer.getPlayerData(player);
+            if (playerData == null) continue;
+            if (playerData.Page == null) continue;
+
+            updateRealtimeEntityData(playerData, store);
 //            playerData.Page.buildRealtimeElements();
-//        }
+        }
     }
 
     private static void fullRebuild(@NonNullDecl WorldData worldData, @NonNullDecl Store<EntityStore> store) {
@@ -150,7 +146,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
     }
 
     public static void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {
-        if (playerData.SelectedEntityId == -1) return;
+        if (playerData.SelectedEntity == null) return;
         if (playerData.Page == null) return;
 
         var entityData = playerData.getSelectedEntityData();
@@ -178,36 +174,31 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         }
     }
 
-    private static final List<Integer> _entitiesToRemove = new ArrayList<>();
-    public static void checkForInvalidEntities(@NonNullDecl WorldData worldData, @NonNullDecl Store<EntityStore> store) {
-        _entitiesToRemove.clear();
-
-        for (var entity : worldData.Entities.values()) {
-            try {
-                var uuid = entity.UniqueId;
-                var world = store.getExternalData().getWorld();
-                var entityRef = world.getEntityRef(uuid);
-                if  (entityRef == null || !entityRef.isValid()) {
-                    _entitiesToRemove.add(entity.Id);
-                }
-            } catch (Exception _) {
-                _entitiesToRemove.add(entity.Id);
-            }
-        }
-
-//        var hadOne = !_entitiesToRemove.isEmpty();
-        for (var remove : _entitiesToRemove) {
-            var entity = worldData.Entities.get(remove);
-            EntityViewer.log("[" + worldData.Name + "] Removing invalid entity: " + entity.UniqueId);
-
-            worldData.Entities.remove(remove);
-            PageSignals.onDestroyEntity(worldData, entity);
-        }
-
-        _entitiesToRemove.clear();
-
-//        if (hadOne) {
-//            worldData.DrawAll = true;
+//    private static final List<UUID> _entitiesToRemove = new ArrayList<>();
+//    public static void checkForInvalidEntities(@NonNullDecl WorldData worldData, @NonNullDecl Store<EntityStore> store) {
+//        _entitiesToRemove.clear();
+//
+//        for (var entity : worldData.Entities.values()) {
+//            var uuid = entity.UUID;
+//            try {
+//                var world = store.getExternalData().getWorld();
+//                var entityRef = world.getEntityRef(uuid);
+//                if  (entityRef == null || !entityRef.isValid()) {
+//                    _entitiesToRemove.add(uuid);
+//                }
+//            } catch (Exception _) {
+//                _entitiesToRemove.add(uuid);
+//            }
 //        }
-    }
+//
+//        for (var remove : _entitiesToRemove) {
+//            var entity = worldData.Entities.get(remove);
+//            EntityViewer.log("[" + worldData.Name + "] Removing invalid entity: " + entity.UUID);
+//
+//            worldData.Entities.remove(remove);
+//            PageSignals.onDestroyEntity(worldData, entity);
+//        }
+//
+//        _entitiesToRemove.clear();
+//    }
 }

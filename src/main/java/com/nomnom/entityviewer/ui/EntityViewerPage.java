@@ -6,9 +6,9 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Transform;
-import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
@@ -17,12 +17,10 @@ import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.*;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
-import com.hypixel.hytale.server.core.modules.interaction.Interactions;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
 import com.hypixel.hytale.server.core.ui.LocalizableString;
@@ -36,7 +34,6 @@ import com.nomnom.entityviewer.EntityData;
 import com.nomnom.entityviewer.EntityViewer;
 import com.nomnom.entityviewer.PlayerData;
 import com.nomnom.entityviewer.WorldData;
-import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nullable;
@@ -45,7 +42,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.Data> {
 //    private final AtomicInteger _customPageRequiredAcknowledgments;
@@ -159,7 +155,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         buildTeleportersList(worldData, uiCommandBuilder, uiEventBuilder, store);
 
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#ReloadButton",
+                "#WorldDetails #ReloadButton",
                 EventData.of("Button", "Reload")
         );
 
@@ -282,7 +278,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         uiCommandBuilder.clear("#EntitiesList");
 
         for (var entity : entities) {
-            createEntityListItem(entity, worldData, false, uiCommandBuilder, uiEventBuilder);
+            createEntityListItem(entity, worldData, uiCommandBuilder, uiEventBuilder);
         }
     }
 
@@ -291,8 +287,6 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         var selectedEntity = playerData.getSelectedEntityData();
         buildSelectedEntity(selectedEntity, uiCommandBuilder, uiEventBuilder);
         buildRealtimeElements(playerData, ref, uiCommandBuilder);
-
-        worldData.DrawRealtimeElements = true;
     }
 
     // dynamic parts
@@ -318,9 +312,6 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         var store = ref.getStore();
         var selectedEntity = playerData.getSelectedEntityData();
         buildSelectedEntityProperties(selectedEntity, store, uiCommandBuilder);
-
-        var worldStore = playerData.getSelectedWorld().getEntityStore().getStore();
-        EntityViewerSystem.updateRealtimeEntityData(playerData, worldStore);
     }
 
     void buildWorldDetails(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder) {
@@ -408,30 +399,43 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         if (iconPath != null) {
             uiCommandBuilder.set("#EntityIcon.Background", iconPath);
         } else {
-            uiCommandBuilder.set("#EntityIcon.Background", "");
+            uiCommandBuilder.set("#EntityIcon.Background", "#FF0000(0.13)");
         }
 
         uiCommandBuilder.set("#EntityName.Text", selectedEntity.DisplayName);
-        uiCommandBuilder.set("#EntityUUID.Visible", selectedEntity.UniqueIdString != null);
-        if (selectedEntity.UniqueIdString != null) {
-            uiCommandBuilder.set("#EntityUUID.Text", selectedEntity.UniqueIdString);
+        uiCommandBuilder.set("#EntityUUID.Visible", selectedEntity.UUIDString != null);
+        if (selectedEntity.UUIDString != null) {
+            uiCommandBuilder.set("#EntityUUID.Text", selectedEntity.UUIDString);
         }
         uiCommandBuilder.set("#EntityId.Text", "entity #" + selectedEntity.Id);
 
         buildSelectedEntityComponentList(selectedEntity, uiCommandBuilder, uiEventBuilder);
 
+        // reload button
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#EntityOptions #ReloadButton",
+                EventData.of("Button", "Entity_Reload")
+        );
+
         // tp button
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#EntityOptions #TpButton",
                 EventData.of("Button", "Entity_GoTo")
-                        .append("EntityId", String.valueOf(selectedEntity.Id))
+                        .append("EntityId", String.valueOf(selectedEntity.UUIDString))
         );
 
         // bring here button
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#EntityOptions #BringHereButton",
                 EventData.of("Button", "Entity_BringHere")
-                        .append("EntityId", String.valueOf(selectedEntity.Id))
+                        .append("EntityId", String.valueOf(selectedEntity.UUIDString))
+        );
+
+        // kill button
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#EntityOptions #KillButton",
+                EventData.of("Button", "Entity_Kill")
+                        .append("EntityId", String.valueOf(selectedEntity.UUIDString))
         );
 
         // close button
@@ -480,20 +484,20 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     public void addEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        EntityViewer.log("addEntity: " + entityData.Id);
+        EntityViewer.log("addEntity: " + entityData.UUIDString);
 
         var worldData = getPlayerData().getSelectedWorldData();
-        createEntityListItem(entityData, worldData, true, uiCommandBuilder, uiEventBuilder);
+        createEntityListItem(entityData, worldData, uiCommandBuilder, uiEventBuilder);
     }
 
     public void removeEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        EntityViewer.log("removeEntity: " + entityData.Id);
+        EntityViewer.log("removeEntity: " + entityData.UUIDString);
 
         uiCommandBuilder.remove(entityData.ElementId);
 
         var playerData = getPlayerData();
-        if (playerData.SelectedEntityId == entityData.Id) {
-            playerData.SelectedEntityId = -1;
+        if (playerData.SelectedEntity != null && playerData.SelectedEntity.equals(entityData.UUID)) {
+            playerData.SelectedEntity = null;
             buildSelectedEntity(null, uiCommandBuilder, uiEventBuilder);
         }
     }
@@ -514,38 +518,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         uiCommandBuilder.set(selector + " #Value.Text", value);
     }
 
-    void createEntityListItem(EntityData entityData, WorldData worldData, boolean canInsert, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
+    void createEntityListItem(EntityData entityData, WorldData worldData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         var elementId = entityData.ElementId;
+        EntityViewer.log("createEntityListItem: uuid:" + entityData.UUIDString + ", group: Group " + elementId + " {}");
 
-        if (canInsert) {
-            if (worldData.Entities.size() == 1) {
-                uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
-            }
-
-            // find the first entity prior
-            var firstEntityId = -1;
-            var priorEntityId = -1;
-            for (var id : worldData.Entities.keySet()) {
-                if (firstEntityId == -1) {
-                    firstEntityId = id;
-                }
-
-                if (id < entityData.Id && id > priorEntityId) {
-                    priorEntityId = id;
-                }
-            }
-
-            if (priorEntityId != -1) {
-                uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
-            } else {
-                if (firstEntityId != -1) {
-                    uiCommandBuilder.insertBeforeInline("#Entity" + firstEntityId, "Group " + elementId + " {}");
-                }
-            }
-        } else {
-            uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
-        }
-
+        uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
         uiCommandBuilder.append(elementId, "Pages/EntityViewer/EntityListItem.ui");
 
         uiCommandBuilder.set(elementId + " #Button.Text", entityData.DisplayName);
@@ -562,7 +539,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 entityData.ElementId + " #Button",
                 EventData.of("Button", "Entity_Select")
-                        .append("EntityId", String.valueOf(entityData.Id))
+                        .append("EntityId", String.valueOf(entityData.UUIDString))
         );
     }
 
@@ -603,14 +580,14 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 case "Entity_Select": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
-                    var entityId = data.entityId == null || data.entityId.isEmpty() ? -1 : Integer.parseInt(data.entityId);
-                    var selectedEntity = entityId == -1 ? null : worldData.Entities.get(entityId);
+                    var entityUUID = data.entityId == null ? null : UUID.fromString(data.entityId);
+                    var selectedEntity = entityUUID == null ? null : worldData.Entities.get(entityUUID);
 
-                    if (selectedEntity != null && playerData.SelectedEntityId != selectedEntity.Id) {
-                        playerData.SelectedEntityId = selectedEntity.Id;
+                    if (selectedEntity != null) {
+                        playerData.SelectedEntity = selectedEntity.UUID;
                         buildSelectedEntity(selectedEntity, commandBuilder, eventBuilder);
                     } else {
-                        playerData.SelectedEntityId = -1;
+                        playerData.SelectedEntity = null;
                         buildSelectedEntity(null, commandBuilder, eventBuilder);
                     }
 
@@ -619,9 +596,6 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                 // tp to the entity
                 case "Player_GoTo": {
-                    var playerData = getPlayerData();
-                    var worldData = playerData.getSelectedWorldData();
-
                     try {
                         var targetUUID = UUID.fromString(data.entityId);
                         var target = Universe.get().getPlayer(targetUUID);
@@ -650,11 +624,22 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                     break;
                 }
+
+                case "Entity_Reload": {
+                    var playerData = getPlayerData();
+                    var worldData = playerData.getSelectedWorldData();
+                    var selectedEntity = worldData.Entities.get(playerData.SelectedEntity);
+                    buildSelectedEntity(selectedEntity, commandBuilder, eventBuilder);
+                    buildRealtimeElements(playerData, ref, commandBuilder);
+
+                    break;
+                }
+
                 case "Entity_GoTo": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
-                    var entityId = Integer.parseInt(data.entityId);
-                    var selectedEntity = worldData.Entities.get(entityId);
+                    var entityUUID = UUID.fromString(data.entityId);
+                    var selectedEntity = worldData.Entities.get(entityUUID);
 
                     try {
                         var entityRef = selectedEntity.getRef(worldData.getWorld());
@@ -687,8 +672,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 case "Entity_BringHere": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
-                    var entityId = Integer.parseInt(data.entityId);
-                    var selectedEntity = worldData.Entities.get(entityId);
+                    var entityUUID = UUID.fromString(data.entityId);
+                    var selectedEntity = worldData.Entities.get(entityUUID);
 
                     try {
                         var world = worldData.getWorld();
@@ -709,7 +694,25 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         });
                     } catch (Exception e) {
-                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                        EntityViewer.err("error when using Entity_BringHere, error: " + e);
+                    }
+
+                    break;
+                }
+
+                case "Entity_Kill": {
+                    var worldData = getPlayerData().getSelectedWorldData();
+                    var entityUUID = UUID.fromString(data.entityId);
+                    var selectedEntity = worldData.Entities.get(entityUUID);
+
+                    try {
+                        var world = worldData.getWorld();
+                        var entityRef = selectedEntity.getRef(world);
+                        world.getEntityStore().getStore().removeEntity(entityRef, RemoveReason.REMOVE);
+
+                        this.fullRebuild();
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using Entity_Kill, error: " + e);
                     }
 
                     break;

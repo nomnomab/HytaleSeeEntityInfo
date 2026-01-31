@@ -4,6 +4,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
@@ -44,8 +45,12 @@ public class DebugStickInteraction extends SimpleInstantInteraction {
 
         // set the entity and world
         var playerData = EntityViewer.getPlayerData(playerRef.getUuid());
-        var world = target.getStore().getExternalData().getWorld();
-        playerData.SelectedEntityId = target.getIndex();
+        var targetStore = target.getStore();
+        var world = targetStore.getExternalData().getWorld();
+        var targetUUIDComponent = targetStore.getComponent(target, UUIDComponent.getComponentType());
+        assert targetUUIDComponent != null;
+
+        playerData.SelectedEntity = targetUUIDComponent.getUuid();
         playerData.SelectedWorldName = world.getName();
 
         if (playerData.Page == null) {

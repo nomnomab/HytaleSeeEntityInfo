@@ -65,6 +65,14 @@ $E = "Common.ui";
     LayoutMode: Left;
     Padding: (Horizontal: 8);
 
+    $E.@InlineTextButton #ReloadButton {
+      @Text = "reload";
+    }
+
+    Group {
+      Anchor: (Right: 5);
+    }
+
     $E.@InlineTextButton #TpButton {
       @Text = "tp";
     }
@@ -75,6 +83,14 @@ $E = "Common.ui";
 
     $E.@InlineTextButton #BringHereButton {
       @Text = "bring here";
+    }
+
+    Group {
+      Anchor: (Right: 5);
+    }
+
+    $E.@InlineTextButton #KillButton {
+      @Text = "kill";
     }
 
     Group {
