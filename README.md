@@ -1,8 +1,43 @@
 # See Entity Info Plugin
 
+<img width="1273" height="775" alt="HytaleClient_EozUDWjPpx" src="https://github.com/user-attachments/assets/c3758798-1b5d-44dc-8ec2-9e3fd96dd81b" />
+
+> Until the ui system hytale uses better supports "realtime" guis, the shown world/entity data is not always accurate.
+> 
+> **Note**: not fully tested in a multi-player environment so usage bugs may occur.
+
 A plugin for Hytale that lets you open a gui to view a list of entities per world.
 
 ---
+
+## Features
+
+### Entity List
+
+- Open with `/entityinfo` or with the Debug Stick.
+- Can see a list of entities per world.
+- Can select an entity to view basic information:
+  - Name
+  - Component list
+  - Last position
+  - Last rotation
+  - Model path (if available)
+  - Model asset id (if available)
+  - UUID
+
+### Actions
+
+- Tp to the selected world.
+- Tp to a player.
+- Tp to a teleporter.
+- Tp to an entity.
+- Tp an entity to you.
+- Kill an entity.
+
+### Debug Stick
+
+- Smack an entity to open it in the gui.
+- Sneak click to open the gui.
 
 ## Building
 
