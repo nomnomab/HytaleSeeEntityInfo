@@ -88,6 +88,7 @@ public class PlayerData {
 
     public void buildRealtimeElements() {
         if (Page == null) return;
+//        if (!Page.canUpdate()) return;
         Page.buildRealtimeElements();
     }
 

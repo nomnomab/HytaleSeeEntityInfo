@@ -24,6 +24,7 @@ import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
 import com.nomnom.entityviewer.items.DebugStickInteraction;
+import com.nomnom.entityviewer.items.DebugStickSneakInteraction;
 import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import com.nomnom.entityviewer.systems.ListenSystem;
 import com.nomnom.entityviewer.ui.PageSignals;
@@ -82,6 +83,7 @@ public class EntityViewer extends JavaPlugin {
         this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
         this.getEntityStoreRegistry().registerSystem(new ListenSystem());
         this.getCodecRegistry(Interaction.CODEC).register("debug_stick_interaction", DebugStickInteraction.class, DebugStickInteraction.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("debug_stick_sneak_interaction", DebugStickSneakInteraction.class, DebugStickSneakInteraction.CODEC);
     }
 
     @Override

@@ -33,13 +33,14 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
     @Override
     public void tick(float dt, int index, @NonNullDecl Store<EntityStore> store) {
         updateWorld(dt, store);
-        updateRealtimeElements(dt, store);
     }
 
     void updateWorld(float dt, @NonNullDecl Store<EntityStore> store) {
         var world = store.getExternalData().getWorld();
         var worldData = EntityViewer.getWorldData(world);
         if (worldData == null) return;
+
+        updateRealtimeElements(dt, worldData, store);
 
         worldData.ValidateTimer += dt;
 
@@ -52,18 +53,6 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         }
 
         updateDraw(worldData, store);
-
-        // not alive or running, so not point in updating it
-//        if (!world.isAlive() || world.isPaused()) {
-//            worldData.clear();
-//            return;
-//        }
-
-        // check for invalid entities, such as non-valid or missing
-//        if (worldData.ValidateTimer >= 5.0) {
-//            worldData.ValidateTimer = 0;
-//            checkForInvalidEntities(worldData, store);
-//        }
     }
 
     void updateDraw(WorldData worldData, @NonNullDecl Store<EntityStore> store) {
@@ -119,22 +108,27 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         }
     }
 
-    void updateRealtimeElements(float dt, @NonNullDecl Store<EntityStore> store) {
-        _updateRealtimeElementsTimer += dt;
-        if (!(_updateRealtimeElementsTimer >= 1.0)) {
-            return;
-        }
-        _updateRealtimeElementsTimer = 0.0;
+    void updateRealtimeElements(float dt, WorldData worldData, @NonNullDecl Store<EntityStore> store) {
+        // todo: wait for Hytale to support this without eating inputs
+        return;
 
-        var world = store.getExternalData().getWorld();
-        for (var player : world.getPlayerRefs()) {
-            var playerData = EntityViewer.getPlayerData(player);
-            if (playerData == null) continue;
-
-            updateRealtimeEntityData(playerData, store);
-        }
-
-        PageSignals.drawRealtimeElements();
+//        _updateRealtimeElementsTimer += dt;
+//        if (!worldData.DrawRealtimeElements && !(_updateRealtimeElementsTimer >= 0.1)) {
+//            return;
+//        }
+//        _updateRealtimeElementsTimer = 0.0;
+//        worldData.DrawRealtimeElements = false;
+//
+//        var world = store.getExternalData().getWorld();
+//        for (var player : world.getPlayerRefs()) {
+//            var playerData = EntityViewer.getPlayerData(player);
+//            if (playerData == null) continue;
+//            if (playerData.Page == null) continue;
+////            if (!playerData.Page.canUpdate()) continue;
+//
+//            updateRealtimeEntityData(playerData, store);
+//            playerData.Page.buildRealtimeElements();
+//        }
     }
 
     private static void fullRebuild(@NonNullDecl WorldData worldData, @NonNullDecl Store<EntityStore> store) {
@@ -155,8 +149,9 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
         EntityViewer.log("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
     }
 
-    void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {
+    public static void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {
         if (playerData.SelectedEntityId == -1) return;
+        if (playerData.Page == null) return;
 
         var entityData = playerData.getSelectedEntityData();
         if (entityData == null) return;

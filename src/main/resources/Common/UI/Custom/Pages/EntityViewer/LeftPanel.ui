@@ -80,6 +80,14 @@ $E = "Common.ui";
         Text: "tp";
       }
     }
+
+    Group {
+      LayoutMode: Left;
+
+      $E.@InlineTextButton #WorldNewEntity {
+        Text: "new entity (dev)";
+      }
+    }
   }
 
   Group {

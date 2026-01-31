@@ -46,6 +46,39 @@
               }
             }
           }
+        },
+        {
+          "Type": "Simple",
+          "Effects": {
+            "ItemAnimationId": "Interact"
+          },
+          "RunTime": 0.05,
+          "Next": {
+            "Type": "Condition",
+            "Crouching": true,
+            "Failed": {
+              "Type": "Simple",
+              "Effects": {
+                "LocalSoundEventId": "SFX_Capture_Crate_Capture_Fail_Local"
+              }
+            },
+            "Next":{
+              "Type": "debug_stick_sneak_interaction",
+              "Failed": {
+                "Type": "Simple",
+                "Effects": {
+                  "LocalSoundEventId": "SFX_Capture_Crate_Capture_Fail_Local"
+                }
+              },
+              "Next": {
+                "Type": "Simple",
+                "Effects": {
+                  "LocalSoundEventId": "SFX_Capture_Crate_Capture_Succeed_Local",
+                  "WorldSoundEventId": "SFX_Capture_Crate_Capture_Succeed"
+                }
+              }
+            }
+          }
         }
       ]
     }

@@ -4,16 +4,25 @@ import com.hypixel.hytale.builtin.teleport.TeleportPlugin;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.AddReason;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Transform;
+import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.asset.type.model.config.Model;
+import com.hypixel.hytale.server.core.asset.type.model.config.ModelAsset;
 import com.hypixel.hytale.server.core.command.system.CommandManager;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
-import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
+import com.hypixel.hytale.server.core.modules.entity.component.*;
 import com.hypixel.hytale.server.core.modules.entity.teleport.Teleport;
+import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
+import com.hypixel.hytale.server.core.modules.interaction.Interactions;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.ui.DropdownEntryInfo;
 import com.hypixel.hytale.server.core.ui.LocalizableString;
@@ -27,6 +36,7 @@ import com.nomnom.entityviewer.EntityData;
 import com.nomnom.entityviewer.EntityViewer;
 import com.nomnom.entityviewer.PlayerData;
 import com.nomnom.entityviewer.WorldData;
+import com.nomnom.entityviewer.systems.EntityViewerSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nullable;
@@ -34,14 +44,30 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.Data> {
+//    private final AtomicInteger _customPageRequiredAcknowledgments;
+
     public EntityViewerPage(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime) {
         super(playerRef, lifetime, Data.CODEC);
 
         EntityViewer.registerPlayer(playerRef);
         getPlayerData().Page = this;
         EntityViewer.log("Player " + playerRef.getUsername() + " opened page");
+
+//        try {
+//            var pageManager = getPlayerData().getPlayer().getPageManager();
+//            var pageManagerClass = pageManager.getClass();
+//            var customPageRequiredAcknowledgmentsField = pageManagerClass.getDeclaredField("customPageRequiredAcknowledgments");
+//            customPageRequiredAcknowledgmentsField.setAccessible(true);
+//
+//            var customPageRequiredAcknowledgments = customPageRequiredAcknowledgmentsField.get(pageManager);
+//            _customPageRequiredAcknowledgments = (AtomicInteger)customPageRequiredAcknowledgments;
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @Override
@@ -66,6 +92,12 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         EntityViewer.log("Player " + playerRef.getUsername() + " closed page");
     }
+
+//    public boolean canUpdate() {
+//        var value = _customPageRequiredAcknowledgments.get();
+//        EntityViewer.log("Custom Page Required Acknowledgments: " + value);
+//        return value == 0;
+//    }
 
     public void fullRebuild() {
         EntityViewer.log("Full Rebuild");
@@ -114,7 +146,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
             buildMiddlePanel(playerData, worldData, ref, uiCommandBuilder, uiEventBuilder, store);
             buildRightPanel(playerData, worldData, ref, uiCommandBuilder, uiEventBuilder, store);
 
-            buildRealtimeElements(playerData, ref, uiCommandBuilder, uiEventBuilder);
+            buildRealtimeElements(playerData, ref, uiCommandBuilder);
         } catch (Exception e) {
             EntityViewer.err("error building EntityViewer page, e: " + e);
         }
@@ -134,6 +166,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 "#WorldTpButton",
                 EventData.of("Button", "World_GoTo")
+        );
+
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#WorldNewEntity",
+                EventData.of("Button", "World_NewEntity")
         );
     }
 
@@ -253,6 +290,9 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     void buildRightPanel(@NonNullDecl PlayerData playerData, @NonNullDecl WorldData worldData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder, @NonNullDecl Store<EntityStore> store) {
         var selectedEntity = playerData.getSelectedEntityData();
         buildSelectedEntity(selectedEntity, uiCommandBuilder, uiEventBuilder);
+        buildRealtimeElements(playerData, ref, uiCommandBuilder);
+
+        worldData.DrawRealtimeElements = true;
     }
 
     // dynamic parts
@@ -267,21 +307,23 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         if (ref == null) return;
 
         var uiCommandBuilder = new UICommandBuilder();
-        var uiEventBuilder = new UIEventBuilder();
-        buildRealtimeElements(playerData, ref, uiCommandBuilder, uiEventBuilder);
+        buildRealtimeElements(playerData, ref, uiCommandBuilder);
 
-        this.sendUpdate(uiCommandBuilder, uiEventBuilder, false);
+        this.sendUpdate(uiCommandBuilder, false);
     }
 
-    public void buildRealtimeElements(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
-        buildWorldDetails(playerData, ref, uiCommandBuilder, uiEventBuilder);
+    public void buildRealtimeElements(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder) {
+        buildWorldDetails(playerData, ref, uiCommandBuilder);
 
         var store = ref.getStore();
         var selectedEntity = playerData.getSelectedEntityData();
-        buildSelectedEntityProperties(selectedEntity, store, uiCommandBuilder, uiEventBuilder);
+        buildSelectedEntityProperties(selectedEntity, store, uiCommandBuilder);
+
+        var worldStore = playerData.getSelectedWorld().getEntityStore().getStore();
+        EntityViewerSystem.updateRealtimeEntityData(playerData, worldStore);
     }
 
-    void buildWorldDetails(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
+    void buildWorldDetails(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder) {
         // world time
         var worldTime = getWorldTime(ref.getStore());
         var localTime = worldTime.getGameDateTime();
@@ -391,6 +433,12 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 EventData.of("Button", "Entity_BringHere")
                         .append("EntityId", String.valueOf(selectedEntity.Id))
         );
+
+        // close button
+        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                "#EntityOptions #CloseButton",
+                EventData.of("Button", "Entity_Select")
+        );
     }
 
     void buildSelectedEntityComponentList(EntityData selectedEntity, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
@@ -410,7 +458,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         }
     }
 
-    void buildSelectedEntityProperties(EntityData selectedEntity, @NonNullDecl Store<EntityStore> store, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
+    void buildSelectedEntityProperties(EntityData selectedEntity, @NonNullDecl Store<EntityStore> store, @NonNullDecl UICommandBuilder uiCommandBuilder) {
         if (selectedEntity == null) return;
 
         uiCommandBuilder.clear("#EntityPropertiesList");
@@ -540,8 +588,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         // button
         if (data.button != null) {
-//            EntityViewer.log("data.button: " + data.button);
-//            EntityViewer.log("data.entityId: " + data.entityId);
+            EntityViewer.log("data.button: " + data.button);
+            EntityViewer.log("data.entityId: " + data.entityId);
 
             switch (data.button) {
                 // reload the whole lookup for the world
@@ -555,19 +603,53 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 case "Entity_Select": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
-                    var entityId = Integer.parseInt(data.entityId);
-                    var selectedEntity = worldData.Entities.get(entityId);
+                    var entityId = data.entityId == null || data.entityId.isEmpty() ? -1 : Integer.parseInt(data.entityId);
+                    var selectedEntity = entityId == -1 ? null : worldData.Entities.get(entityId);
 
                     if (selectedEntity != null && playerData.SelectedEntityId != selectedEntity.Id) {
                         playerData.SelectedEntityId = selectedEntity.Id;
                         buildSelectedEntity(selectedEntity, commandBuilder, eventBuilder);
+                    } else {
+                        playerData.SelectedEntityId = -1;
+                        buildSelectedEntity(null, commandBuilder, eventBuilder);
                     }
 
                     break;
                 }
 
                 // tp to the entity
-                case "Player_GoTo":
+                case "Player_GoTo": {
+                    var playerData = getPlayerData();
+                    var worldData = playerData.getSelectedWorldData();
+
+                    try {
+                        var targetUUID = UUID.fromString(data.entityId);
+                        var target = Universe.get().getPlayer(targetUUID);
+                        var targetRef = target.getReference();
+                        var targetTranform = store.getComponent(targetRef, TransformComponent.getComponentType());
+
+                        // move player to entity
+                        assert playerRef.getWorldUuid() != null;
+                        var world = Universe.get().getWorld(playerRef.getWorldUuid());
+
+                        assert world != null;
+
+                        var playerRef = this.playerRef;
+                        world.execute(() -> {
+                            var teleport = Teleport.createForPlayer(world,
+                                    targetTranform.getPosition(),
+                                    new Vector3f(0, 0, 0)
+                            );
+                            store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+
+                            close();
+                        });
+                    } catch (Exception e) {
+                        EntityViewer.err("error when using Player_GoTo, error: " + e);
+                    }
+
+                    break;
+                }
                 case "Entity_GoTo": {
                     var playerData = getPlayerData();
                     var worldData = playerData.getSelectedWorldData();
@@ -595,7 +677,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         });
                     } catch (Exception e) {
-                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                        EntityViewer.err("error when using Entity_GoTo, error: " + e);
                     }
 
                     break;
@@ -709,6 +791,35 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                     } catch (Exception e) {
                         EntityViewer.err("error when using EntityTpTo, error: " + e);
                     }
+
+                    break;
+                }
+
+                // (dev) make a new test entity
+                case "World_NewEntity": {
+                    var playerData = getPlayerData();
+                    var world = playerData.getSelectedWorld();
+                    var worldStore = world.getEntityStore().getStore();
+                    var transform = store.getComponent(playerRef.getReference(), EntityModule.get().getTransformComponentType());
+
+                    world.execute(() -> {
+                        var holder = EntityStore.REGISTRY.newHolder();
+                        var modelAsset = ModelAsset.getAssetMap().getAsset("Minecart");
+                        var model = Model.createScaledModel(modelAsset, 1.0f);
+
+                        holder.addComponent(TransformComponent.getComponentType(), transform.clone());
+                        holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
+                        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
+                        holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(model.getBoundingBox()));
+
+                        var id = worldStore.getExternalData().takeNextNetworkId();
+                        holder.addComponent(NetworkId.getComponentType(), new NetworkId(id));
+
+                        holder.ensureComponent(UUIDComponent.getComponentType());
+
+                        worldStore.addEntity(holder, AddReason.SPAWN);
+                        EntityViewer.log("Spawned " + id);
+                    });
 
                     break;
                 }

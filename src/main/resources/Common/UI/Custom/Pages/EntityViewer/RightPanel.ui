@@ -6,7 +6,7 @@ $E = "Common.ui";
   Anchor: (Width: $E.@RightPanelWidth);
   Background: #000000(0.13);
   //        Background: #0000ff(0.2);
-  Padding: 0;
+  Padding: (Vertical: 4);
 
   // Title details
   Group {
@@ -75,6 +75,14 @@ $E = "Common.ui";
 
     $E.@InlineTextButton #BringHereButton {
       @Text = "bring here";
+    }
+
+    Group {
+      FlexWeight: 1;
+    }
+
+    $E.@InlineTextButton #CloseButton {
+      @Text = "close";
     }
   }
 
