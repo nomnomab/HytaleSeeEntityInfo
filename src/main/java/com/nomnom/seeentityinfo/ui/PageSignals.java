@@ -24,13 +24,13 @@ public class PageSignals {
     }
 
     public static void onCreateEntity(WorldData worldData, EntityData entityData) {
-        SeeEntityInfo.log("onCreateEntity: uuid: " + entityData.UUID);
+        SeeEntityInfo.logDebug("onCreateEntity: uuid: " + entityData.UUID);
 
         worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.ADD, entityData.UUID, entityData));
     }
 
     public static void onDestroyEntity(WorldData worldData, EntityData entityData) {
-        SeeEntityInfo.log("onDestroyEntity: uuid: " + entityData.UUID);
+        SeeEntityInfo.logDebug("onDestroyEntity: uuid: " + entityData.UUID);
 
         worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.REMOVE, entityData.UUID, entityData));
     }
@@ -44,12 +44,12 @@ public class PageSignals {
 
     /// Rebuild all pages for a specific world.
     public static void rebuildPages(WorldData worldData) {
-        SeeEntityInfo.log("rebuildPages: " + worldData.EntityChanges.size());
+        SeeEntityInfo.logDebug("rebuildPages: " + worldData.EntityChanges.size());
         for (var playerRef : worldData.getWorld().getPlayerRefs()) {
             var playerData = SeeEntityInfo.getPlayerData(playerRef);
             if (playerData == null) continue;
 
-            SeeEntityInfo.log("rebuilding for player " + playerData.UUID.toString());
+            SeeEntityInfo.logDebug("rebuilding for player " + playerData.UUID.toString());
             playerData.rebuildPage();
         }
     }

@@ -68,7 +68,7 @@ public class UpdateEntityDataSystem extends TickingSystem<EntityStore> {
             worldData.DrawEntitiesList = false;
             PageSignals.buildEntitiesLists(worldData);
         } else if (!worldData.EntityChanges.isEmpty()) {
-            SeeEntityInfo.log("world " + worldData.Name + " has " + worldData.EntityChanges.size() + " changes.");
+            SeeEntityInfo.logDebug("world " + worldData.Name + " has " + worldData.EntityChanges.size() + " changes.");
 
             _pageCache.clear();
             for (var playerRef : worldData.getWorld().getPlayerRefs()) {
@@ -145,7 +145,7 @@ public class UpdateEntityDataSystem extends TickingSystem<EntityStore> {
 
         worldData.DrawAll = true;
 
-        SeeEntityInfo.log("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
+        SeeEntityInfo.logDebug("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
     }
 
     public static void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {

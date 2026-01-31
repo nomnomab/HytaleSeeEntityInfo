@@ -52,7 +52,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         SeeEntityInfo.registerPlayer(playerRef);
         getPlayerData().Page = this;
-        SeeEntityInfo.log("Player " + playerRef.getUsername() + " opened page");
+        SeeEntityInfo.logDebug("Player " + playerRef.getUsername() + " opened page");
 
 //        try {
 //            var pageManager = getPlayerData().getPlayer().getPageManager();
@@ -87,7 +87,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
             playerData.Page = null;
         }
 
-        SeeEntityInfo.log("Player " + playerRef.getUsername() + " closed page");
+        SeeEntityInfo.logDebug("Player " + playerRef.getUsername() + " closed page");
     }
 
 //    public boolean canUpdate() {
@@ -97,7 +97,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 //    }
 
     public void fullRebuild() {
-        SeeEntityInfo.log("Full Rebuild");
+        SeeEntityInfo.logDebug("Full Rebuild");
         this.rebuild();
     }
 
@@ -487,14 +487,14 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     public void addEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        SeeEntityInfo.log("addEntity: " + entityData.UUIDString);
+        SeeEntityInfo.logDebug("addEntity: " + entityData.UUIDString);
 
         var worldData = getPlayerData().getSelectedWorldData();
         createEntityListItem(entityData, worldData, uiCommandBuilder, uiEventBuilder);
     }
 
     public void removeEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        SeeEntityInfo.log("removeEntity: " + entityData.UUIDString);
+        SeeEntityInfo.logDebug("removeEntity: " + entityData.UUIDString);
 
         uiCommandBuilder.remove(entityData.ElementId);
 
@@ -523,7 +523,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
     void createEntityListItem(EntityData entityData, WorldData worldData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         var elementId = entityData.ElementId;
-        SeeEntityInfo.log("createEntityListItem: uuid:" + entityData.UUIDString + ", group: Group " + elementId + " {}");
+        SeeEntityInfo.logDebug("createEntityListItem: uuid:" + entityData.UUIDString + ", group: Group " + elementId + " {}");
 
         uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
         uiCommandBuilder.append(elementId, "Pages/SeeEntityInfo/EntityListItem.ui");
@@ -568,8 +568,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         // button
         if (data.button != null) {
-            SeeEntityInfo.log("data.button: " + data.button);
-            SeeEntityInfo.log("data.entityId: " + data.entityId);
+            SeeEntityInfo.logDebug("data.button: " + data.button);
+            SeeEntityInfo.logDebug("data.entityId: " + data.entityId);
 
             switch (data.button) {
                 // reload the whole lookup for the world
@@ -727,7 +727,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 case "World_Switch": {
                     var worldName = data.dropdown;
                     try {
-                        SeeEntityInfo.log("Switching world " + worldName);
+                        SeeEntityInfo.logDebug("Switching world " + worldName);
 
                         var playerData = getPlayerData();
                         playerData.SelectedWorldName = worldName;
@@ -750,7 +750,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         var player = playerData.getPlayer();
                         assert player.getWorld() != null;
 
-                        SeeEntityInfo.log("Requesting world tp from " + player.getWorld().getName() + " to " + world.getName());
+                        SeeEntityInfo.logDebug("Requesting world tp from " + player.getWorld().getName() + " to " + world.getName());
                         if (player.getWorld() != world) {
                             // teleport to world
                             player.getWorld().execute(() -> {
@@ -826,7 +826,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         holder.ensureComponent(UUIDComponent.getComponentType());
 
                         worldStore.addEntity(holder, AddReason.SPAWN);
-                        SeeEntityInfo.log("Spawned " + id);
+                        SeeEntityInfo.logDebug("Spawned " + id);
                     });
 
                     break;

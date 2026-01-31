@@ -35,6 +35,8 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class SeeEntityInfo extends JavaPlugin {
+    private static final boolean ShowLogs = false;
+
     public static volatile Map<UUID, PlayerData> Players;
     public static volatile Map<String, WorldData> Worlds;
 
@@ -62,6 +64,11 @@ public class SeeEntityInfo extends JavaPlugin {
 
     public static void log(String message) {
         getInstance().getLogger().at(Level.INFO).log(message);
+    }
+
+    public static void logDebug(String message) {
+        if (!ShowLogs) return;
+        log(message);
     }
 
     public static void warn(String message) {
@@ -130,7 +137,7 @@ public class SeeEntityInfo extends JavaPlugin {
 
     private static void onWorldsLoaded(AllWorldsLoadedEvent event) {
         var worlds = Universe.get().getWorlds();
-        log("worlds loaded: " + worlds.size());
+        logDebug("worlds loaded: " + worlds.size());
 
         for (var world : worlds.values()) {
             registerWorld(world);
@@ -139,14 +146,14 @@ public class SeeEntityInfo extends JavaPlugin {
 
     private static void onWorldAdded(AddWorldEvent addWorldEvent) {
         var world = addWorldEvent.getWorld();
-        log("World added: " + world.getName());
+        logDebug("World added: " + world.getName());
 
         registerWorld(world);
     }
 
     private static void onWorldRemoved(RemoveWorldEvent removeWorldEvent) {
         var world = removeWorldEvent.getWorld();
-        log("World removed: " + world.getName());
+        logDebug("World removed: " + world.getName());
 
         unregisterWorld(world);
     }
@@ -200,7 +207,7 @@ public class SeeEntityInfo extends JavaPlugin {
         if  (page == null) return false;
 
         var pageClass = page.getClass();
-        SeeEntityInfo.log("package: " + pageClass.getPackageName());
+        logDebug("package: " + pageClass.getPackageName());
 
         if (pageClass.getPackageName().startsWith("com.nomnom.seeentityinfo")) {
             pageManager.openCustomPage(ref, store, page);
@@ -211,7 +218,7 @@ public class SeeEntityInfo extends JavaPlugin {
 
     public static void registerPlayer(UUID uuid) {
         if (!Players.containsKey(uuid)) {
-            log("Registering player " + uuid);
+            logDebug("Registering player " + uuid);
             Players.put(uuid, new PlayerData(uuid));
 
             PageSignals.drawAllPlayerLists();
@@ -227,7 +234,7 @@ public class SeeEntityInfo extends JavaPlugin {
         var uuid = playerRef.getUuid();
         if (!Players.containsKey(uuid)) return;
 
-        log("Unregistering player " + playerRef);
+        logDebug("Unregistering player " + playerRef);
         Players.remove(uuid);
 
         PageSignals.drawAllPlayerLists();
@@ -253,13 +260,13 @@ public class SeeEntityInfo extends JavaPlugin {
     public static void registerWorld(World world) {
         var name = world.getName();
         if (!Worlds.containsKey(name)) {
-            log("Registering world " + world.getName());
+            logDebug("Registering world " + world.getName());
             Worlds.put(name, new WorldData(world));
         }
     }
 
     public static void unregisterWorld(World world) {
-        log("Unregistering world " + world.getName());
+        logDebug("Unregistering world " + world.getName());
 
         var name = world.getName();
         Worlds.remove(name);
