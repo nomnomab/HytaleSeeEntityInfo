@@ -1,10 +1,10 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.nomnom.entityviewer.ui.EntityViewerPage;
+import com.nomnom.seeentityinfo.ui.EntityViewerPage;
 
 import java.util.UUID;
 
@@ -59,7 +59,7 @@ public class PlayerData {
         var world = getWorld();
         if (world == null) return null;
 
-        return EntityViewer.getWorldData(world);
+        return SeeEntityInfo.getWorldData(world);
     }
 
     public World getSelectedWorld() {
@@ -70,7 +70,7 @@ public class PlayerData {
         var world = getSelectedWorld();
         if (world == null) return null;
 
-        return EntityViewer.getWorldData(world);
+        return SeeEntityInfo.getWorldData(world);
     }
 
     public EntityData getSelectedEntityData() {

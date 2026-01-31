@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer.items;
+package com.nomnom.seeentityinfo.items;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.protocol.InteractionState;
@@ -8,8 +8,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.SimpleInstantInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.nomnom.entityviewer.EntityViewer;
-import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
+import com.nomnom.seeentityinfo.commands.ShowEntityViewerCommand;
 
 import javax.annotation.Nonnull;
 

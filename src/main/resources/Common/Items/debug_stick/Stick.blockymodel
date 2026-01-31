@@ -3,7 +3,7 @@
     {
       "id": "1",
       "name": "R-Attachment",
-      "position": {"x": 0, "y": 57, "z": 0},
+      "position": {"x": 0, "y": 24, "z": 0},
       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
       "shape": {
         "type": "none",
@@ -22,7 +22,7 @@
         {
           "id": "2",
           "name": "Origin_Projectile",
-          "position": {"x": 0, "y": 86, "z": 0},
+          "position": {"x": 0, "y": -24, "z": 0},
           "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
           "shape": {
             "type": "none",
@@ -41,7 +41,7 @@
             {
               "id": "3",
               "name": "Origin_Item",
-              "position": {"x": 0, "y": -68, "z": 0},
+              "position": {"x": 0, "y": 0, "z": 0},
               "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
               "shape": {
                 "type": "none",
@@ -60,12 +60,12 @@
                 {
                   "id": "4",
                   "name": "Handle",
-                  "position": {"x": 0, "y": -18, "z": 0},
+                  "position": {"x": 0, "y": 0, "z": 0},
                   "orientation": {"x": -0.5, "y": -0.5, "z": 0.5, "w": 0.5},
                   "shape": {
                     "type": "box",
-                    "offset": {"x": 1, "y": 0, "z": 0},
-                    "stretch": {"x": -1, "y": 1, "z": 1},
+                    "offset": {"x": 16, "y": 0, "z": 0},
+                    "stretch": {"x": -1, "y": 0.875, "z": 0.875},
                     "settings": {
                       "isPiece": false,
                       "size": {"x": 32, "y": 6, "z": 6}
@@ -93,8 +93,8 @@
                       },
                       "top": {
                         "offset": {"x": 56, "y": 0},
-                        "mirror": {"x": true, "y": true},
-                        "angle": 270
+                        "mirror": {"x": false, "y": false},
+                        "angle": 90
                       },
                       "bottom": {
                         "offset": {"x": 50, "y": 0},
@@ -110,22 +110,23 @@
                   "children": [
                     {
                       "id": "5",
-                      "name": "Handle2",
-                      "position": {"x": 42, "y": 0, "z": 0},
+                      "name": "Handle2--C1",
+                      "position": {"x": 34.5, "y": 0, "z": 0},
                       "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
                       "shape": {
                         "type": "box",
-                        "offset": {"x": -7.5, "y": 0, "z": 0},
+                        "offset": {"x": 0, "y": 0, "z": 0},
                         "stretch": {"x": 1, "y": 1.07612, "z": 1.15771},
                         "settings": {
                           "isPiece": false,
-                          "size": {"x": 37, "y": 6, "z": 6}
+                          "size": {"x": 37, "y": 6, "z": 6},
+                          "isStaticBox": true
                         },
                         "textureLayout": {
                           "back": {
                             "offset": {"x": 64, "y": 0},
-                            "mirror": {"x": true, "y": true},
-                            "angle": 270
+                            "mirror": {"x": false, "y": false},
+                            "angle": 90
                           },
                           "right": {
                             "offset": {"x": 58, "y": 58},
@@ -134,8 +135,13 @@
                           },
                           "front": {
                             "offset": {"x": 58, "y": 37},
+                            "mirror": {"x": true, "y": true},
+                            "angle": 90
+                          },
+                          "left": {
+                            "offset": {"x": 0, "y": 0},
                             "mirror": {"x": false, "y": false},
-                            "angle": 270
+                            "angle": 0
                           },
                           "top": {
                             "offset": {"x": 64, "y": 37},
@@ -144,29 +150,10 @@
                           },
                           "bottom": {
                             "offset": {"x": 58, "y": 37},
-                            "mirror": {"x": false, "y": false},
-                            "angle": 270
+                            "mirror": {"x": true, "y": true},
+                            "angle": 90
                           }
                         },
-                        "unwrapMode": "custom",
-                        "visible": true,
-                        "doubleSided": false,
-                        "shadingMode": "flat"
-                      }
-                    },
-                    {
-                      "id": "6",
-                      "name": "Handle2",
-                      "position": {"x": -8, "y": 0, "z": 0},
-                      "orientation": {"x": 0, "y": 0, "z": 0, "w": 1},
-                      "shape": {
-                        "type": "none",
-                        "offset": {"x": 0, "y": 0, "z": 0},
-                        "stretch": {"x": 0, "y": 0, "z": 0},
-                        "settings": {
-                          "isPiece": false
-                        },
-                        "textureLayout": {},
                         "unwrapMode": "custom",
                         "visible": true,
                         "doubleSided": false,

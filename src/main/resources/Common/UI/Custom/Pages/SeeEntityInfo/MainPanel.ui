@@ -14,7 +14,7 @@ $C.@DecoratedContainer {
     Group {
       LayoutMode: Left;
       $C.@Title {
-        @Text = "Entity Viewer";
+        @Text = "See Entity Info";
       }
     }
 

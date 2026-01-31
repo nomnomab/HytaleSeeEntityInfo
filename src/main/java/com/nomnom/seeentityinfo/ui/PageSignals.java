@@ -1,85 +1,83 @@
-package com.nomnom.entityviewer.ui;
+package com.nomnom.seeentityinfo.ui;
 
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.nomnom.entityviewer.EntityData;
-import com.nomnom.entityviewer.EntityViewer;
-import com.nomnom.entityviewer.WorldData;
+import com.nomnom.seeentityinfo.EntityData;
+import com.nomnom.seeentityinfo.SeeEntityInfo;
+import com.nomnom.seeentityinfo.WorldData;
 
 /// Holds useful functions to make updating the EntityViewer page
 /// easier!
 public class PageSignals {
     /// Rebuilds all entity lookups across all worlds.
     public static void rebuildAllEntityLookups() {
-        for (var world : EntityViewer.Worlds.values()) {
+        for (var world : SeeEntityInfo.Worlds.values()) {
             world.RebuildEntityLookup = true;
         }
     }
 
     /// Rebuilds the entity lookup for one world.
     public static void rebuildEntityLookup(World world) {
-        var worldData = EntityViewer.getWorldData(world);
+        var worldData = SeeEntityInfo.getWorldData(world);
         if (worldData == null) return;
 
         worldData.RebuildEntityLookup = true;
     }
 
     public static void onCreateEntity(WorldData worldData, EntityData entityData) {
-        EntityViewer.log("onCreateEntity: uuid: " + entityData.UUID);
+        SeeEntityInfo.log("onCreateEntity: uuid: " + entityData.UUID);
 
         worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.ADD, entityData.UUID, entityData));
     }
 
     public static void onDestroyEntity(WorldData worldData, EntityData entityData) {
-        EntityViewer.log("onDestroyEntity: uuid: " + entityData.UUID);
+        SeeEntityInfo.log("onDestroyEntity: uuid: " + entityData.UUID);
 
         worldData.EntityChanges.add(new WorldData.EntityChange(WorldData.EntityChangeType.REMOVE, entityData.UUID, entityData));
     }
 
     /// Rebuild all pages.
     public static void rebuildPages() {
-        for (var player : EntityViewer.Players.values()) {
+        for (var player : SeeEntityInfo.Players.values()) {
             player.rebuildPage();
         }
     }
 
     /// Rebuild all pages for a specific world.
     public static void rebuildPages(WorldData worldData) {
-        EntityViewer.log("rebuildPages: " + worldData.EntityChanges.size());
+        SeeEntityInfo.log("rebuildPages: " + worldData.EntityChanges.size());
         for (var playerRef : worldData.getWorld().getPlayerRefs()) {
-            EntityViewer.log("playerRef");
-            var playerData = EntityViewer.getPlayerData(playerRef);
+            var playerData = SeeEntityInfo.getPlayerData(playerRef);
             if (playerData == null) continue;
 
-            EntityViewer.log("rebuilding for player " + playerData.UUID.toString());
-
+            SeeEntityInfo.log("rebuilding for player " + playerData.UUID.toString());
             playerData.rebuildPage();
         }
     }
 
     /// Update all page realtime elements.
     public static void drawRealtimeElements() {
-        for (var player : EntityViewer.Players.values()) {
+        for (var player : SeeEntityInfo.Players.values()) {
             player.buildRealtimeElements();
         }
     }
 
     /// Enqueues the draw of the player lists.
     public static void drawAllPlayerLists() {
-        for (var world : EntityViewer.Worlds.values()) {
+        for (var world : SeeEntityInfo.Worlds.values()) {
             world.DrawPlayerList = true;
         }
     }
 
     /// Enqueues the draw of the teleporter lists.
     public static void drawAllTeleporterLists() {
-        for (var world : EntityViewer.Worlds.values()) {
+        for (var world : SeeEntityInfo.Worlds.values()) {
             world.DrawTeleportersList = true;
         }
     }
 
     /// Enqueues the draw of the teleporter lists.
     public static void drawAllEntitiesLists() {
-        for (var world : EntityViewer.Worlds.values()) {
+        for (var world : SeeEntityInfo.Worlds.values()) {
             world.DrawEntitiesList = true;
         }
     }
@@ -87,7 +85,7 @@ public class PageSignals {
     /// Enqueues the draw of the teleporter lists.
     public static void buildEntitiesLists(WorldData worldData) {
         for (var playerRef : worldData.getWorld().getPlayerRefs()) {
-            var playerData = EntityViewer.getPlayerData(playerRef);
+            var playerData = SeeEntityInfo.getPlayerData(playerRef);
             if (playerData == null) continue;
 
             playerData.buildEntitiesList();

@@ -1,14 +1,14 @@
 {
     "Group": "com.nomnom",
-    "Name": "Entity Viewer",
+    "Name": "See Entity Info",
     "Version": "0.0.2",
-    "Description": "An example plugin for HyTale!",
+    "Description": "Provides a way to see a list of entities in each world, see basic information about each entity, and check what components something has.",
     "Authors": [
         {
             "Name": "Nomnom"
         }
     ],
-    "Website": "example.org",
+    "Website": "",
     "ServerVersion": "*",
     "Dependencies": {
         "Hytale:EntityModule": "*"
@@ -17,6 +17,6 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "com.nomnom.entityviewer.EntityViewer",
+    "Main": "com.nomnom.seeentityinfo.SeeEntityInfo",
     "IncludesAssetPack": true
 }

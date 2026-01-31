@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
@@ -22,29 +22,29 @@ import com.hypixel.hytale.server.core.universe.world.events.AddWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.events.AllWorldsLoadedEvent;
 import com.hypixel.hytale.server.core.universe.world.events.RemoveWorldEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.nomnom.entityviewer.commands.ShowEntityViewerCommand;
-import com.nomnom.entityviewer.items.DebugStickInteraction;
-import com.nomnom.entityviewer.items.DebugStickSneakInteraction;
-import com.nomnom.entityviewer.systems.EntityViewerSystem;
-import com.nomnom.entityviewer.systems.ListenSystem;
-import com.nomnom.entityviewer.ui.PageSignals;
-import com.nomnom.entityviewer.ui.ValueToString;
+import com.nomnom.seeentityinfo.commands.ShowEntityViewerCommand;
+import com.nomnom.seeentityinfo.items.DebugStickInteraction;
+import com.nomnom.seeentityinfo.items.DebugStickSneakInteraction;
+import com.nomnom.seeentityinfo.systems.UpdateEntityDataSystem;
+import com.nomnom.seeentityinfo.systems.ListenSystem;
+import com.nomnom.seeentityinfo.ui.PageSignals;
+import com.nomnom.seeentityinfo.ui.ValueToString;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.logging.Level;
 
-public class EntityViewer extends JavaPlugin {
+public class SeeEntityInfo extends JavaPlugin {
     public static volatile Map<UUID, PlayerData> Players;
     public static volatile Map<String, WorldData> Worlds;
 
-    private static EntityViewer instance;
+    private static SeeEntityInfo instance;
     private static ValueToString _valueToString;
 
     private final List<CommandRegistration> _commands = new ArrayList<>(16);
     private final List<Registration> _events = new ArrayList<>(16);
 
-    public EntityViewer(@Nonnull JavaPluginInit init) {
+    public SeeEntityInfo(@Nonnull JavaPluginInit init) {
         super(init);
 
         instance = this;
@@ -53,23 +53,23 @@ public class EntityViewer extends JavaPlugin {
         Players = new HashMap<>(32);
         Worlds = new HashMap<>(32);
 
-        getLogger().at(Level.INFO).log("[EntityViewer] Plugin loaded!");
+        log("Plugin loaded!");
     }
 
-    public static EntityViewer getInstance() {
+    public static SeeEntityInfo getInstance() {
         return instance;
     }
 
     public static void log(String message) {
-        getInstance().getLogger().at(Level.INFO).log("[EntityViewer] " + message);
+        getInstance().getLogger().at(Level.INFO).log(message);
     }
 
     public static void warn(String message) {
-        getInstance().getLogger().at(Level.WARNING).log("[EntityViewer] " + message);
+        getInstance().getLogger().at(Level.WARNING).log(message);
     }
 
     public static void err(String message) {
-        getInstance().getLogger().at(Level.SEVERE).log("[EntityViewer] " + message);
+        getInstance().getLogger().at(Level.SEVERE).log(message);
     }
 
     @Override
@@ -79,11 +79,11 @@ public class EntityViewer extends JavaPlugin {
         registerEvents();
         registerCommands();
 
-        _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityviewer", "Shows the Entity Viewer")));
-        this.getEntityStoreRegistry().registerSystem(new EntityViewerSystem());
+        _commands.add(this.getCommandRegistry().registerCommand(new ShowEntityViewerCommand("entityinfo", "Shows the Entity Viewer")));
+        this.getEntityStoreRegistry().registerSystem(new UpdateEntityDataSystem());
         this.getEntityStoreRegistry().registerSystem(new ListenSystem());
-        this.getCodecRegistry(Interaction.CODEC).register("debug_stick_interaction", DebugStickInteraction.class, DebugStickInteraction.CODEC);
-        this.getCodecRegistry(Interaction.CODEC).register("debug_stick_sneak_interaction", DebugStickSneakInteraction.class, DebugStickSneakInteraction.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("SeeEntityInfo_DebugStick", DebugStickInteraction.class, DebugStickInteraction.CODEC);
+        this.getCodecRegistry(Interaction.CODEC).register("SeeEntityInfo_DebugStickSneak", DebugStickSneakInteraction.class, DebugStickSneakInteraction.CODEC);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class EntityViewer extends JavaPlugin {
         }
         _commands.clear();
 
-        EntityStore.REGISTRY.unregisterSystem(EntityViewerSystem.class);
+        EntityStore.REGISTRY.unregisterSystem(UpdateEntityDataSystem.class);
         EntityStore.REGISTRY.unregisterSystem(ListenSystem.class);
 
         for (var e : _events) {
@@ -110,15 +110,15 @@ public class EntityViewer extends JavaPlugin {
     }
 
     private void registerEvents() {
-        _events.add(this.getEventRegistry().register(LoadedAssetsEvent.class, ModelAsset.class, EntityViewer::onModelAssetLoad));
-        _events.add(this.getEventRegistry().registerGlobal(AllWorldsLoadedEvent.class, EntityViewer::onWorldsLoaded));
-        _events.add(this.getEventRegistry().registerGlobal(AddWorldEvent.class, EntityViewer::onWorldAdded));
-        _events.add(this.getEventRegistry().registerGlobal(RemoveWorldEvent.class, EntityViewer::onWorldRemoved));
+        _events.add(this.getEventRegistry().register(LoadedAssetsEvent.class, ModelAsset.class, SeeEntityInfo::onModelAssetLoad));
+        _events.add(this.getEventRegistry().registerGlobal(AllWorldsLoadedEvent.class, SeeEntityInfo::onWorldsLoaded));
+        _events.add(this.getEventRegistry().registerGlobal(AddWorldEvent.class, SeeEntityInfo::onWorldAdded));
+        _events.add(this.getEventRegistry().registerGlobal(RemoveWorldEvent.class, SeeEntityInfo::onWorldRemoved));
 //        _events.add(this.getEventRegistry().registerGlobal(PlayerConnectEvent.class, EntityViewer::onPlayerJoined));
-        _events.add(this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, EntityViewer::onPlayerReady));
-        _events.add(this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, EntityViewer::onPlayerLeft));
+        _events.add(this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, SeeEntityInfo::onPlayerReady));
+        _events.add(this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, SeeEntityInfo::onPlayerLeft));
 
-        PacketAdapters.registerOutbound(EntityViewer::reopenPage);
+        PacketAdapters.registerOutbound(SeeEntityInfo::reopenPage);
     }
 
     private void registerCommands() {}
@@ -200,9 +200,9 @@ public class EntityViewer extends JavaPlugin {
         if  (page == null) return false;
 
         var pageClass = page.getClass();
-        EntityViewer.log("package: " + pageClass.getPackageName());
+        SeeEntityInfo.log("package: " + pageClass.getPackageName());
 
-        if (pageClass.getPackageName().startsWith("com.nomnom.entityviewer")) {
+        if (pageClass.getPackageName().startsWith("com.nomnom.seeentityinfo")) {
             pageManager.openCustomPage(ref, store, page);
         }
 

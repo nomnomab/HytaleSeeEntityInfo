@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer.ui;
+package com.nomnom.seeentityinfo.ui;
 
 import com.hypixel.hytale.math.vector.Vector3d;
 import com.hypixel.hytale.math.vector.Vector3f;

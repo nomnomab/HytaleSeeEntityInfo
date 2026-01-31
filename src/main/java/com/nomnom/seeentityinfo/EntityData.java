@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
@@ -36,7 +36,7 @@ public class EntityData {
 
     public String getIconPath() {
         if (ModelAssetId != null && !ModelAssetId.isEmpty()) {
-            var model = EntityViewer.MODELS.get(ModelAssetId);
+            var model = SeeEntityInfo.MODELS.get(ModelAssetId);
             var iconPath = "Pages/Memories/npcs/" + model.getId() + ".png";
             var fullIconPath = "UI/Custom/" + iconPath;
             if (CommonAssetRegistry.hasCommonAsset(fullIconPath)) {

@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 

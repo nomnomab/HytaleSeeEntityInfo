@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import java.util.ArrayList;
 import java.util.List;

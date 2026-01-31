@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer.systems;
+package com.nomnom.seeentityinfo.systems;
 
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.system.tick.TickingSystem;
@@ -6,22 +6,22 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.nomnom.entityviewer.*;
-import com.nomnom.entityviewer.ui.EntityViewerPage;
-import com.nomnom.entityviewer.ui.PageSignals;
-import com.nomnom.entityviewer.ui.ValueToString;
+import com.nomnom.seeentityinfo.*;
+import com.nomnom.seeentityinfo.ui.EntityViewerPage;
+import com.nomnom.seeentityinfo.ui.PageSignals;
+import com.nomnom.seeentityinfo.ui.ValueToString;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.text.NumberFormat;
 import java.util.*;
 
-public class EntityViewerSystem extends TickingSystem<EntityStore> {
+public class UpdateEntityDataSystem extends TickingSystem<EntityStore> {
     private static final NumberFormat _numberFormat = NumberFormat.getInstance();
 
     private static double _updateRealtimeElementsTimer;
     private final List<EntityViewerPage> _pageCache = new ArrayList<>(16);
 
-    public EntityViewerSystem() {
+    public UpdateEntityDataSystem() {
         _numberFormat.setMaximumFractionDigits(2);
     }
 
@@ -32,7 +32,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
     void updateWorld(float dt, @NonNullDecl Store<EntityStore> store) {
         var world = store.getExternalData().getWorld();
-        var worldData = EntityViewer.getWorldData(world);
+        var worldData = SeeEntityInfo.getWorldData(world);
         if (worldData == null) return;
 
         updateRealtimeElements(dt, worldData, store);
@@ -68,11 +68,11 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
             worldData.DrawEntitiesList = false;
             PageSignals.buildEntitiesLists(worldData);
         } else if (!worldData.EntityChanges.isEmpty()) {
-            EntityViewer.log("world " + worldData.Name + " has " + worldData.EntityChanges.size() + " changes.");
+            SeeEntityInfo.log("world " + worldData.Name + " has " + worldData.EntityChanges.size() + " changes.");
 
             _pageCache.clear();
             for (var playerRef : worldData.getWorld().getPlayerRefs()) {
-                var playerData = EntityViewer.getPlayerData(playerRef);
+                var playerData = SeeEntityInfo.getPlayerData(playerRef);
                 if (playerData == null) continue;
                 if (playerData.Page == null) continue;
 
@@ -118,12 +118,15 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
         var world = store.getExternalData().getWorld();
         for (var player : world.getPlayerRefs()) {
-            var playerData = EntityViewer.getPlayerData(player);
+            var playerData = SeeEntityInfo.getPlayerData(player);
             if (playerData == null) continue;
             if (playerData.Page == null) continue;
 
             updateRealtimeEntityData(playerData, store);
-//            playerData.Page.buildRealtimeElements();
+
+            if (playerData.Page.DrawRuntime) {
+                playerData.Page.buildRealtimeElements();
+            }
         }
     }
 
@@ -142,7 +145,7 @@ public class EntityViewerSystem extends TickingSystem<EntityStore> {
 
         worldData.DrawAll = true;
 
-        EntityViewer.log("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
+        SeeEntityInfo.log("Rebuild for world " + world.getName() + " resulted in " + worldData.Entities.size() + " entities");
     }
 
     public static void updateRealtimeEntityData(PlayerData playerData, @NonNullDecl Store<EntityStore> store) {

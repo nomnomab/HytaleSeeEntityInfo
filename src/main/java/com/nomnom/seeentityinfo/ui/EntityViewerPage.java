@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer.ui;
+package com.nomnom.seeentityinfo.ui;
 
 import com.hypixel.hytale.builtin.teleport.TeleportPlugin;
 import com.hypixel.hytale.codec.Codec;
@@ -30,10 +30,10 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.nomnom.entityviewer.EntityData;
-import com.nomnom.entityviewer.EntityViewer;
-import com.nomnom.entityviewer.PlayerData;
-import com.nomnom.entityviewer.WorldData;
+import com.nomnom.seeentityinfo.EntityData;
+import com.nomnom.seeentityinfo.SeeEntityInfo;
+import com.nomnom.seeentityinfo.PlayerData;
+import com.nomnom.seeentityinfo.WorldData;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import javax.annotation.Nullable;
@@ -44,14 +44,15 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.Data> {
-//    private final AtomicInteger _customPageRequiredAcknowledgments;
+    public boolean DrawRuntime;
+    //    private final AtomicInteger _customPageRequiredAcknowledgments;
 
     public EntityViewerPage(@NonNullDecl PlayerRef playerRef, @NonNullDecl CustomPageLifetime lifetime) {
         super(playerRef, lifetime, Data.CODEC);
 
-        EntityViewer.registerPlayer(playerRef);
+        SeeEntityInfo.registerPlayer(playerRef);
         getPlayerData().Page = this;
-        EntityViewer.log("Player " + playerRef.getUsername() + " opened page");
+        SeeEntityInfo.log("Player " + playerRef.getUsername() + " opened page");
 
 //        try {
 //            var pageManager = getPlayerData().getPlayer().getPageManager();
@@ -86,7 +87,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
             playerData.Page = null;
         }
 
-        EntityViewer.log("Player " + playerRef.getUsername() + " closed page");
+        SeeEntityInfo.log("Player " + playerRef.getUsername() + " closed page");
     }
 
 //    public boolean canUpdate() {
@@ -96,7 +97,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 //    }
 
     public void fullRebuild() {
-        EntityViewer.log("Full Rebuild");
+        SeeEntityInfo.log("Full Rebuild");
         this.rebuild();
     }
 
@@ -112,7 +113,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
     PlayerData getPlayerData() {
         var uuid = playerRef.getUuid();
-        return EntityViewer.Players.get(uuid);
+        return SeeEntityInfo.Players.get(uuid);
     }
 
     WorldTimeResource getWorldTime(Store<EntityStore> store) {
@@ -127,7 +128,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         var worldData = playerData.getSelectedWorldData();
         playerData.Book.filter(playerData.Filter, worldData);
 
-        uiCommandBuilder.append("Pages/EntityViewer/MainPanel.ui");
+        uiCommandBuilder.append("Pages/SeeEntityInfo/MainPanel.ui");
 
         uiCommandBuilder.set("#SearchInput.Value", playerData.Filter);
         uiEventBuilder.addEventBinding(CustomUIEventBindingType.ValueChanged,
@@ -144,7 +145,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
             buildRealtimeElements(playerData, ref, uiCommandBuilder);
         } catch (Exception e) {
-            EntityViewer.err("error building EntityViewer page, e: " + e);
+            SeeEntityInfo.err("error building SeeEntityInfo page, e: " + e);
         }
     }
 
@@ -164,16 +165,16 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 EventData.of("Button", "World_GoTo")
         );
 
-        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                "#WorldNewEntity",
-                EventData.of("Button", "World_NewEntity")
-        );
+//        uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+//                "#WorldNewEntity",
+//                EventData.of("Button", "World_NewEntity")
+//        );
     }
 
     void buildWorldDetails(@NonNullDecl PlayerData playerData, @NonNullDecl WorldData worldData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder, @NonNullDecl Store<EntityStore> store) {
         // world dropdown
         var worldDropdownOptions = new ArrayList<DropdownEntryInfo>();
-        for (var world : EntityViewer.Worlds.keySet()) {
+        for (var world : SeeEntityInfo.Worlds.keySet()) {
             worldDropdownOptions.add(new DropdownEntryInfo(LocalizableString.fromString(world), world));
         }
         uiCommandBuilder.set("#WorldDropdown.Entries", worldDropdownOptions);
@@ -217,11 +218,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         for (var playerRef : playerRefs) {
             var playerName = playerRef.getUsername();
 
-            uiCommandBuilder.append("#WorldPlayersList", "Pages/EntityViewer/ListItem.ui");
+            uiCommandBuilder.append("#WorldPlayersList", "Pages/SeeEntityInfo/ListItem.ui");
             uiCommandBuilder.set("#WorldPlayersList[" + index + "] #Name.Text", playerName);
 
 //            if (playerRef != this.playerRef) {
-                uiCommandBuilder.append("#WorldPlayersList[" + index + "]", "Pages/EntityViewer/InlineTextButton.ui");
+                uiCommandBuilder.append("#WorldPlayersList[" + index + "]", "Pages/SeeEntityInfo/InlineTextButton.ui");
                 uiCommandBuilder.set("#WorldPlayersList[" + index + "] #InlineTextButton.Text", "tp");
 
                 uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
@@ -249,10 +250,10 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 continue;
             }
 
-            uiCommandBuilder.append("#WorldTeleportersList", "Pages/EntityViewer/ListItem.ui");
+            uiCommandBuilder.append("#WorldTeleportersList", "Pages/SeeEntityInfo/ListItem.ui");
             uiCommandBuilder.set("#WorldTeleportersList[" + index + "] #Name.Text", warp.getId());
 
-            uiCommandBuilder.append("#WorldTeleportersList[" + index + "]", "Pages/EntityViewer/InlineTextButton.ui");
+            uiCommandBuilder.append("#WorldTeleportersList[" + index + "]", "Pages/SeeEntityInfo/InlineTextButton.ui");
             uiCommandBuilder.set("#WorldTeleportersList[" + index + "] #InlineTextButton.Text", "tp");
 
             uiEventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
@@ -312,6 +313,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         var store = ref.getStore();
         var selectedEntity = playerData.getSelectedEntityData();
         buildSelectedEntityProperties(selectedEntity, store, uiCommandBuilder);
+
+        DrawRuntime = false;
     }
 
     void buildWorldDetails(PlayerData playerData, @NonNullDecl Ref<EntityStore> ref, @NonNullDecl UICommandBuilder uiCommandBuilder) {
@@ -455,7 +458,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         var index = 0;
         for (var component : components) {
-            uiCommandBuilder.append("#EntityComponentsList", "Pages/EntityViewer/EntityComponentListItem.ui");
+            uiCommandBuilder.append("#EntityComponentsList", "Pages/SeeEntityInfo/EntityComponentListItem.ui");
             uiCommandBuilder.set("#EntityComponentsList[" + index + "] #ComponentName.Text", component);
 
             index++;
@@ -484,14 +487,14 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     public void addEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        EntityViewer.log("addEntity: " + entityData.UUIDString);
+        SeeEntityInfo.log("addEntity: " + entityData.UUIDString);
 
         var worldData = getPlayerData().getSelectedWorldData();
         createEntityListItem(entityData, worldData, uiCommandBuilder, uiEventBuilder);
     }
 
     public void removeEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
-        EntityViewer.log("removeEntity: " + entityData.UUIDString);
+        SeeEntityInfo.log("removeEntity: " + entityData.UUIDString);
 
         uiCommandBuilder.remove(entityData.ElementId);
 
@@ -505,11 +508,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     // helpers
 
     void appendEntityPropertyItem(String root, @NonNullDecl UICommandBuilder uiCommandBuilder) {
-        uiCommandBuilder.append(root, "Pages/EntityViewer/EntityPropertyItem.ui");
+        uiCommandBuilder.append(root, "Pages/SeeEntityInfo/EntityPropertyItem.ui");
     }
 
     void appendEntityPropertyItem(String root, int index, String key, String value, @NonNullDecl UICommandBuilder uiCommandBuilder) {
-        uiCommandBuilder.append(root, "Pages/EntityViewer/EntityPropertyItem.ui");
+        uiCommandBuilder.append(root, "Pages/SeeEntityInfo/EntityPropertyItem.ui");
         setEntityPropertyItem(root + "[" + index + "]", key, value, uiCommandBuilder);
     }
 
@@ -520,10 +523,10 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
     void createEntityListItem(EntityData entityData, WorldData worldData, @NonNullDecl UICommandBuilder uiCommandBuilder, @NonNullDecl UIEventBuilder uiEventBuilder) {
         var elementId = entityData.ElementId;
-        EntityViewer.log("createEntityListItem: uuid:" + entityData.UUIDString + ", group: Group " + elementId + " {}");
+        SeeEntityInfo.log("createEntityListItem: uuid:" + entityData.UUIDString + ", group: Group " + elementId + " {}");
 
         uiCommandBuilder.appendInline("#EntitiesList", "Group " + elementId + " {}");
-        uiCommandBuilder.append(elementId, "Pages/EntityViewer/EntityListItem.ui");
+        uiCommandBuilder.append(elementId, "Pages/SeeEntityInfo/EntityListItem.ui");
 
         uiCommandBuilder.set(elementId + " #Button.Text", entityData.DisplayName);
         uiCommandBuilder.set(elementId + " #Id.Text", "#" + entityData.Id);
@@ -565,8 +568,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
         // button
         if (data.button != null) {
-            EntityViewer.log("data.button: " + data.button);
-            EntityViewer.log("data.entityId: " + data.entityId);
+            SeeEntityInfo.log("data.button: " + data.button);
+            SeeEntityInfo.log("data.entityId: " + data.entityId);
 
             switch (data.button) {
                 // reload the whole lookup for the world
@@ -590,6 +593,8 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         playerData.SelectedEntity = null;
                         buildSelectedEntity(null, commandBuilder, eventBuilder);
                     }
+
+                    DrawRuntime = true;
 
                     break;
                 }
@@ -619,7 +624,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         });
                     } catch (Exception e) {
-                        EntityViewer.err("error when using Player_GoTo, error: " + e);
+                        SeeEntityInfo.err("error when using Player_GoTo, error: " + e);
                     }
 
                     break;
@@ -662,7 +667,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         });
                     } catch (Exception e) {
-                        EntityViewer.err("error when using Entity_GoTo, error: " + e);
+                        SeeEntityInfo.err("error when using Entity_GoTo, error: " + e);
                     }
 
                     break;
@@ -694,7 +699,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         });
                     } catch (Exception e) {
-                        EntityViewer.err("error when using Entity_BringHere, error: " + e);
+                        SeeEntityInfo.err("error when using Entity_BringHere, error: " + e);
                     }
 
                     break;
@@ -712,7 +717,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                         this.fullRebuild();
                     } catch (Exception e) {
-                        EntityViewer.err("error when using Entity_Kill, error: " + e);
+                        SeeEntityInfo.err("error when using Entity_Kill, error: " + e);
                     }
 
                     break;
@@ -722,7 +727,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                 case "World_Switch": {
                     var worldName = data.dropdown;
                     try {
-                        EntityViewer.log("Switching world " + worldName);
+                        SeeEntityInfo.log("Switching world " + worldName);
 
                         var playerData = getPlayerData();
                         playerData.SelectedWorldName = worldName;
@@ -731,7 +736,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                         playerData.rebuildPage();
                     } catch (Exception e) {
-                        EntityViewer.err("error when using dropdown value, error: " + e);
+                        SeeEntityInfo.err("error when using dropdown value, error: " + e);
                     }
                     break;
                 }
@@ -745,7 +750,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         var player = playerData.getPlayer();
                         assert player.getWorld() != null;
 
-                        EntityViewer.log("Requesting world tp from " + player.getWorld().getName() + " to " + world.getName());
+                        SeeEntityInfo.log("Requesting world tp from " + player.getWorld().getName() + " to " + world.getName());
                         if (player.getWorld() != world) {
                             // teleport to world
                             player.getWorld().execute(() -> {
@@ -755,7 +760,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             close();
                         }
                     } catch (Exception e) {
-                        EntityViewer.err("Error while executing TpToWorld");
+                        SeeEntityInfo.err("Error while executing TpToWorld");
                     }
                     break;
                 }
@@ -792,7 +797,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                             }
                         }
                     } catch (Exception e) {
-                        EntityViewer.err("error when using EntityTpTo, error: " + e);
+                        SeeEntityInfo.err("error when using EntityTpTo, error: " + e);
                     }
 
                     break;
@@ -821,7 +826,7 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         holder.ensureComponent(UUIDComponent.getComponentType());
 
                         worldStore.addEntity(holder, AddReason.SPAWN);
-                        EntityViewer.log("Spawned " + id);
+                        SeeEntityInfo.log("Spawned " + id);
                     });
 
                     break;

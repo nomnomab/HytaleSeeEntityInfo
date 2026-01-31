@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer;
+package com.nomnom.seeentityinfo;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -129,11 +129,11 @@ public class WorldData {
         Entities.remove(uuid);
 
         var world = getWorld();
-        var worldData = EntityViewer.getWorldData(world);
+        var worldData = SeeEntityInfo.getWorldData(world);
         worldData.DrawEntitiesList = true;
 
         for (var playerRef : world.getPlayerRefs()) {
-            var playerData = EntityViewer.getPlayerData(playerRef);
+            var playerData = SeeEntityInfo.getPlayerData(playerRef);
             if (playerData != null) {
                 playerData.Book.remove(uuid);
             }

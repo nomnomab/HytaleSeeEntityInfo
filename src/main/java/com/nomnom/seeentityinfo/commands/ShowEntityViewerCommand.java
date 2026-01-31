@@ -1,4 +1,4 @@
-package com.nomnom.entityviewer.commands;
+package com.nomnom.seeentityinfo.commands;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -9,8 +9,8 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.nomnom.entityviewer.EntityViewer;
-import com.nomnom.entityviewer.ui.EntityViewerPage;
+import com.nomnom.seeentityinfo.SeeEntityInfo;
+import com.nomnom.seeentityinfo.ui.EntityViewerPage;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,7 +33,7 @@ public class ShowEntityViewerCommand extends AbstractPlayerCommand {
         var page = new EntityViewerPage(playerRef, CustomPageLifetime.CanDismiss);
         player.getPageManager().openCustomPage(ref, store, page);
 
-        var playerData = EntityViewer.getPlayerData(playerRef);
+        var playerData = SeeEntityInfo.getPlayerData(playerRef);
         playerData.getSelectedWorldData().RebuildEntityLookup = true;
     }
 }

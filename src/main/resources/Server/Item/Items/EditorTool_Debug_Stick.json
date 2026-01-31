@@ -1,7 +1,7 @@
 {
   "TranslationProperties": {
-    "Name": "items.entityViewer.tools.DebugStick.name",
-    "Description": "items.entityViewer.tools.DebugStick.description"
+    "Name": "items.seeEntityInfo.tools.DebugStick.name",
+    "Description": "items.seeEntityInfo.tools.DebugStick.description"
   },
   "Id": "Debug_Stick",
   "Icon": "Icons/ItemsGenerated/Debug_Stick.png",
@@ -31,7 +31,7 @@
           },
           "RunTime": 0.05,
           "Next": {
-            "Type": "debug_stick_interaction",
+            "Type": "SeeEntityInfo_DebugStick",
             "Failed": {
               "Type": "Simple",
               "Effects": {
@@ -63,7 +63,7 @@
               }
             },
             "Next":{
-              "Type": "debug_stick_sneak_interaction",
+              "Type": "SeeEntityInfo_DebugStickSneak",
               "Failed": {
                 "Type": "Simple",
                 "Effects": {
@@ -89,8 +89,7 @@
       "Adventure": 128,
       "Creative": 128
     },
-    "AllEntities": true,
-    "DisplayOutlines": true
+    "AllEntities": true
   },
   "Quality": "Tool",
   "Utility": {
