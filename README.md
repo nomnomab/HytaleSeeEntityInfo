@@ -36,6 +36,7 @@ A plugin for Hytale that lets you open a gui to view a list of entities per worl
 
 ### Debug Stick
 
+- Can be found in the `Editor Tools` creative tab.
 - Smack an entity to open it in the gui.
 - Sneak click to open the gui.
 
