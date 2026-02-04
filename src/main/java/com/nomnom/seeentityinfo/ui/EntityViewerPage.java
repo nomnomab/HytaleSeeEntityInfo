@@ -490,15 +490,23 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
         SeeEntityInfo.logDebug("addEntity: " + entityData.UUIDString);
 
         var worldData = getPlayerData().getSelectedWorldData();
-        createEntityListItem(entityData, worldData, uiCommandBuilder, uiEventBuilder);
+        var playerData = getPlayerData();
+        if (playerData.Book.canFilter(playerData.Filter, worldData, entityData)) {
+            playerData.Book.Entities.add(entityData);
+            createEntityListItem(entityData, worldData, uiCommandBuilder, uiEventBuilder);
+        }
     }
 
     public void removeEntity(EntityData entityData, UICommandBuilder uiCommandBuilder, UIEventBuilder uiEventBuilder) {
         SeeEntityInfo.logDebug("removeEntity: " + entityData.UUIDString);
 
-        uiCommandBuilder.remove(entityData.ElementId);
-
+        // is this element even available
         var playerData = getPlayerData();
+        if (playerData.Book.hasElementId(entityData.ElementId)) {
+            uiCommandBuilder.remove(entityData.ElementId);
+            playerData.Book.Entities.remove(entityData);
+        }
+
         if (playerData.SelectedEntity != null && playerData.SelectedEntity.equals(entityData.UUID)) {
             playerData.SelectedEntity = null;
             buildSelectedEntity(null, uiCommandBuilder, uiEventBuilder);
@@ -547,7 +555,6 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
     }
 
     // events
-
 
     @Override
     public void handleDataEvent(@NonNullDecl Ref<EntityStore> ref, @NonNullDecl Store<EntityStore> store, @NonNullDecl Data data) {

@@ -1,7 +1,7 @@
 {
     "Group": "com.nomnom",
     "Name": "See Entity Info",
-    "Version": "0.1.0",
+    "Version": "1.0.0",
     "Description": "Provides a way to see a list of entities in each world, see basic information about each entity, and check what components something has.",
     "Authors": [
         {

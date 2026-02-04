@@ -40,6 +40,13 @@ A plugin for Hytale that lets you open a gui to view a list of entities per worl
 - Smack an entity to open it in the gui.
 - Sneak click to open the gui.
 
+### Filtering
+
+The entity list can be filtered (search at the top-right) by the following:
+- `c:` searches by component name
+- `uuid:` searches by uuid
+- No prefix searches by name
+
 ## Building
 
 ### Prerequisites
