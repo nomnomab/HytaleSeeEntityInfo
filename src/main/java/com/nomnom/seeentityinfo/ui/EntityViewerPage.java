@@ -622,13 +622,17 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                         var playerRef = this.playerRef;
                         world.execute(() -> {
-                            var teleport = Teleport.createForPlayer(world,
-                                    targetTranform.getPosition(),
-                                    new Vector3f(0, 0, 0)
-                            );
-                            store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+                            try {
+                                var teleport = Teleport.createForPlayer(world,
+                                        targetTranform.getPosition(),
+                                        new Vector3f(0, 0, 0)
+                                );
+                                store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
 
-                            close();
+                                close();
+                            } catch (Exception e) {
+                                SeeEntityInfo.err("Player_GoTo Exception: " + e.getMessage());
+                            }
                         });
                     } catch (Exception e) {
                         SeeEntityInfo.err("error when using Player_GoTo, error: " + e);
@@ -665,13 +669,17 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                         var playerRef = this.playerRef;
                         world.execute(() -> {
-                            var teleport = Teleport.createForPlayer(world,
-                                    entityTransform.getPosition(),
-                                    new Vector3f(0, 0, 0)
-                            );
-                            store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+                            try {
+                                var teleport = Teleport.createForPlayer(world,
+                                        entityTransform.getPosition(),
+                                        new Vector3f(0, 0, 0)
+                                );
+                                store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
 
-                            close();
+                                close();
+                            } catch (Exception e) {
+                                SeeEntityInfo.err("Entity_GoTo Exception: " + e.getMessage());
+                            }
                         });
                     } catch (Exception e) {
                         SeeEntityInfo.err("error when using Entity_GoTo, error: " + e);
@@ -697,13 +705,17 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                         var entityStore = world.getEntityStore().getStore();
                         world.execute(() -> {
-                            var teleport = Teleport.createForPlayer(world,
-                                    playerTransform.getPosition(),
-                                    new Vector3f(0, 0, 0)
-                            );
-                            entityStore.addComponent(entityRef, Teleport.getComponentType(), teleport);
+                            try {
+                                var teleport = Teleport.createForPlayer(world,
+                                        playerTransform.getPosition(),
+                                        new Vector3f(0, 0, 0)
+                                );
+                                entityStore.addComponent(entityRef, Teleport.getComponentType(), teleport);
 
-                            close();
+                                close();
+                            }  catch (Exception e) {
+                                SeeEntityInfo.err("Entity_BringHere Exception: " + e.getMessage());
+                            }
                         });
                     } catch (Exception e) {
                         SeeEntityInfo.err("error when using Entity_BringHere, error: " + e);
@@ -761,7 +773,11 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                         if (player.getWorld() != world) {
                             // teleport to world
                             player.getWorld().execute(() -> {
-                                CommandManager.get().handleCommand(player, "tp world " + world.getName());
+                                try {
+                                    CommandManager.get().handleCommand(player, "tp world " + world.getName());
+                                } catch (Exception e) {
+                                    SeeEntityInfo.err("error when executing World_GoTo, error: " + e);
+                                }
                             });
 
                             close();
@@ -790,16 +806,20 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
 
                                 var playerRef = this.playerRef;
                                 world.execute(() -> {
-                                    var forward = Transform.getDirection(
-                                            teleport.getRotation().getPitch(),
-                                            teleport.getRotation().getYaw()
-                                    );
-                                    teleport.setPosition(
-                                            teleport.getPosition().add(forward.scale(2))
-                                    );
-                                    store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
+                                    try {
+                                        var forward = Transform.getDirection(
+                                                teleport.getRotation().getPitch(),
+                                                teleport.getRotation().getYaw()
+                                        );
+                                        teleport.setPosition(
+                                                teleport.getPosition().add(forward.scale(2))
+                                        );
+                                        store.addComponent(playerRef.getReference(), Teleport.getComponentType(), teleport);
 
-                                    close();
+                                        close();
+                                    } catch (Exception e) {
+                                        SeeEntityInfo.err("error when executing Teleport, error: " + e);
+                                    }
                                 });
                             }
                         }
@@ -818,22 +838,26 @@ public class EntityViewerPage extends InteractiveCustomUIPage<EntityViewerPage.D
                     var transform = store.getComponent(playerRef.getReference(), EntityModule.get().getTransformComponentType());
 
                     world.execute(() -> {
-                        var holder = EntityStore.REGISTRY.newHolder();
-                        var modelAsset = ModelAsset.getAssetMap().getAsset("Minecart");
-                        var model = Model.createScaledModel(modelAsset, 1.0f);
+                        try {
+                            var holder = EntityStore.REGISTRY.newHolder();
+                            var modelAsset = ModelAsset.getAssetMap().getAsset("Minecart");
+                            var model = Model.createScaledModel(modelAsset, 1.0f);
 
-                        holder.addComponent(TransformComponent.getComponentType(), transform.clone());
-                        holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
-                        holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
-                        holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(model.getBoundingBox()));
+                            holder.addComponent(TransformComponent.getComponentType(), transform.clone());
+                            holder.addComponent(PersistentModel.getComponentType(), new PersistentModel(model.toReference()));
+                            holder.addComponent(ModelComponent.getComponentType(), new ModelComponent(model));
+                            holder.addComponent(BoundingBox.getComponentType(), new BoundingBox(model.getBoundingBox()));
 
-                        var id = worldStore.getExternalData().takeNextNetworkId();
-                        holder.addComponent(NetworkId.getComponentType(), new NetworkId(id));
+                            var id = worldStore.getExternalData().takeNextNetworkId();
+                            holder.addComponent(NetworkId.getComponentType(), new NetworkId(id));
 
-                        holder.ensureComponent(UUIDComponent.getComponentType());
+                            holder.ensureComponent(UUIDComponent.getComponentType());
 
-                        worldStore.addEntity(holder, AddReason.SPAWN);
-                        SeeEntityInfo.logDebug("Spawned " + id);
+                            worldStore.addEntity(holder, AddReason.SPAWN);
+                            SeeEntityInfo.logDebug("Spawned " + id);
+                        } catch (Exception e) {
+                            SeeEntityInfo.err("error when executing World_NewEntity, error: " + e);
+                        }
                     });
 
                     break;
